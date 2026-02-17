@@ -199,6 +199,15 @@
     .btn-secondary {
       background: #1e293b;
     }
+    .module-locked .locked-body {
+      pointer-events: none;
+      opacity: 0.4;
+      filter: grayscale(0.4);
+    }
+    .module-locked .quick-check {
+      position: relative;
+      z-index: 2;
+    }
     .sr-only {
       position: absolute;
       width: 1px;
@@ -319,13 +328,29 @@
         <div class="flex gap-2">
           <button id="start-diagnostic" class="btn" type="button">Start Diagnostic</button>
           <button id="start-review" class="btn btn-secondary" type="button">Review Now</button>
-          <button id="start-exam" class="btn btn-secondary" type="button">Exam Simulator</button>
+          <div class="flex gap-1">
+            <button id="start-exam-practice" class="btn btn-secondary" type="button" title="Practice mode feedback after each">Exam: Practice</button>
+            <button id="start-exam-timed" class="btn btn-secondary" type="button" title="Timed mode feedback at end">Exam: Timed</button>
+            <button id="start-exam-sim" class="btn btn-secondary" type="button" title="Simulation mode with flag/review">Exam: Simulation</button>
+          </div>
         </div>
       </div>
       <div id="passProbabilityCard" class="bg-white shadow rounded-xl p-6 mt-6">
-        <h3 class="text-lg font-semibold mb-2">Estimated Pass Probability</h3>
-        <div id="passProbabilityValue" class="text-4xl font-bold"></div>
-        <div id="passProbabilityLabel" class="text-sm mt-1"></div>
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 class="text-lg font-semibold mb-1">Pass Probability</h3>
+            <div id="passProbabilityValue" class="text-4xl font-bold">--%</div>
+            <div id="passProbabilityLabel" class="text-sm mt-1 text-slate-600"></div>
+            <div id="passProbabilityTrend" class="text-xs text-slate-500 mt-1">Trend: --</div>
+          </div>
+          <button id="passProbabilityAction" class="btn" type="button">Next Action</button>
+        </div>
+        <div class="mt-3">
+          <h4 class="text-sm font-semibold text-slate-700 mb-1">Risk Flags</h4>
+          <ul id="passProbabilityFlags" class="list-disc pl-5 text-sm text-slate-700 space-y-1">
+            <li class="text-slate-400">No flags yet</li>
+          </ul>
+        </div>
       </div>
       <div class="interactive-grid mt-4">
         <div class="section-card">
@@ -1401,6 +1426,8 @@
       moduleQuizzes: {},
       examSimulator: []
     },
+    domainScores: {},
+    quickChecks: { completed: {}, skips: {} },
     lastLocation: null,
     readinessScoreHistory: [],
     settings: { printMode: false }
@@ -1413,7 +1440,10 @@
       const raw = localStorage.getItem(stateKey);
       if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
-      return parsed.version === version ? parsed : defaultState();
+      const merged = { ...defaultState(), ...parsed };
+      if (!merged.quickChecks) merged.quickChecks = { completed: {}, skips: {} };
+      if (!merged.domainScores) merged.domainScores = {};
+      return merged.version === version ? merged : defaultState();
     } catch {
       return defaultState();
     }
@@ -1459,62 +1489,64 @@
   // ================================
   function calculatePassProbability(state) {
     const attempts = state.quizAttempts?.examSimulator || [];
-    const bestExam = attempts.length
-      ? Math.max(...attempts.map(a => a.scorePct))
-      : 0;
+    const lastAttempt = attempts.at(-1);
+    const last3 = attempts.slice(-3).map(a => a.scorePct || 0);
+    const bestExam = attempts.length ? Math.max(...attempts.map(a => a.scorePct || 0)) : 0;
+    const diagnostic = state.quizAttempts?.diagnostic?.slice(-1)[0]?.scorePct || 0;
 
-    const diagnostic = state.quizAttempts?.diagnostic?.[0]?.scorePct || 0;
-
-    const domainValues = Object.values(state.domainScores || {});
-    const domainAverage = domainValues.length
-      ? domainValues.reduce((a, b) => a + b, 0) / domainValues.length
-      : 0;
-
-    const weakestDomain = domainValues.length
-      ? Math.min(...domainValues)
-      : 0;
-
-    const domainStability = (domainAverage + weakestDomain) / 2;
+    const domainScores = computeDomainScores(state);
+    const domainValues = Object.values(domainScores);
+    const domainAverage = domainValues.length ? domainValues.reduce((a,b)=>a+b,0)/domainValues.length : 0;
+    const weakestDomain = domainValues.length ? Math.min(...domainValues) : 0;
+    const volatility = last3.length > 1 ? Math.max(...last3) - Math.min(...last3) : 0;
 
     const cardStats = state.cardStats || {};
     const totalCards = Object.keys(cardStats).length || 1;
-    const stableCards = Object.values(cardStats).filter(
-      c => c.reps >= 2 && c.ease >= 2.3
-    ).length;
-
+    const stableCards = Object.values(cardStats).filter(c => c.reps >= 2 && c.ease >= 2.3).length;
     const retentionRatio = stableCards / totalCards;
 
     const improvement = bestExam - diagnostic;
-    const improvementFactor = Math.max(0, Math.min(improvement / 50, 1));
+    const improvementFactor = clamp(improvement / 50, 0, 1);
 
-    const latestAttempt = attempts.length ? attempts[attempts.length - 1] : null;
-    const calibrationPenalty = latestAttempt
-      ? (latestAttempt.highConfidenceErrors || 0) /
-        (latestAttempt.totalQuestions || 1)
-      : 0;
+    const highConfidenceErrors = lastAttempt?.highConfidenceErrors || 0;
+    const calibrationFactor = 1 - (highConfidenceErrors / ((lastAttempt?.totalQuestions) || 1));
 
-    const calibrationFactor = 1 - calibrationPenalty;
-
-    let weighted =
+    const weighted =
       0.35 * (bestExam / 100) +
-      0.20 * (domainStability / 100) +
+      0.20 * (domainAverage / 100) +
       0.20 * retentionRatio +
       0.10 * improvementFactor +
       0.15 * calibrationFactor;
 
-    let passProbability = weighted * 100;
+    let passProbability = clamp(Math.round(weighted * 100), 0, 99);
 
-    if (weakestDomain < 50) {
-      passProbability = Math.min(passProbability, 75);
-    }
+    if (weakestDomain < 50) passProbability = Math.min(passProbability, 75);
+    if (attempts.length < 2) passProbability = Math.min(passProbability, 70);
 
-    if (attempts.length < 2) {
-      passProbability = Math.min(passProbability, 70);
-    }
+    const trend = last3.length > 1 ? last3[last3.length - 1] - last3[0] : 0;
+    const flags = [];
+    if (weakestDomain < 50) flags.push('Weakest domain below 50%');
+    if (attempts.length < 2) flags.push('Fewer than 2 exam attempts');
+    if (highConfidenceErrors > 0) flags.push(`High-confidence errors: ${highConfidenceErrors}`);
+    if (volatility > 20) flags.push('Score volatility > 20 pts');
 
-    passProbability = Math.max(0, Math.min(passProbability, 99));
+    const risk = getRiskLabel(passProbability);
 
-    return Math.round(passProbability);
+    return {
+      probability: passProbability,
+      label: risk.label,
+      colorClass: risk.color,
+      trend,
+      flags: flags.slice(0, 3),
+      breakdown: {
+        examBest: bestExam,
+        diagnostic,
+        domainAverage,
+        retentionRatio,
+        volatility,
+        highConfidenceErrors
+      }
+    };
   }
 
   function getRiskLabel(probability) {
@@ -1523,6 +1555,236 @@
     if (probability < 85) return { label: "Test-Ready", color: "text-blue-500" };
     if (probability < 95) return { label: "Strong", color: "text-green-500" };
     return { label: "Mastery", color: "text-emerald-600" };
+  }
+
+  function computeDomainScores(state) {
+    const scores = {};
+    modules.forEach(m => {
+      const attempts = state.quizAttempts?.moduleQuizzes?.[m.id] || [];
+      const best = attempts.length ? Math.max(...attempts.map(a => a.scorePct || 0)) : 0;
+      scores[m.id] = best;
+    });
+    state.domainScores = { ...scores };
+    return scores;
+  }
+
+  function renderMasteryHUD() {
+    const card = document.getElementById('passProbabilityCard');
+    if (!card) return;
+    const model = calculatePassProbability(state);
+    const valueEl = document.getElementById('passProbabilityValue');
+    const labelEl = document.getElementById('passProbabilityLabel');
+    const trendEl = document.getElementById('passProbabilityTrend');
+    const flagsEl = document.getElementById('passProbabilityFlags');
+    const actionBtn = document.getElementById('passProbabilityAction');
+    if (valueEl) {
+      valueEl.textContent = `${model.probability}%`;
+      valueEl.className = `text-4xl font-bold ${model.colorClass}`;
+    }
+    if (labelEl) labelEl.textContent = model.label;
+    if (trendEl) {
+      const arrow = model.trend > 2 ? '▲' : model.trend < -2 ? '▼' : '▬';
+      trendEl.textContent = `Trend: ${arrow} ${model.trend >= 0 ? '+' : ''}${model.trend.toFixed(0)} pts (last 3)`;
+    }
+    if (flagsEl) {
+      flagsEl.innerHTML = '';
+      const flags = model.flags.length ? model.flags : ['No active risk flags'];
+      flags.forEach(f => {
+        const li = document.createElement('li');
+        li.textContent = f;
+        flagsEl.appendChild(li);
+      });
+    }
+    if (actionBtn) {
+      const next = determineNextAction(model);
+      actionBtn.textContent = next.label;
+      actionBtn.onclick = next.action;
+    }
+  }
+
+  function determineNextAction(model) {
+    const due = countDueCards();
+    const examBest = Math.max(0, ...state.quizAttempts?.examSimulator?.map(a => a.scorePct || 0));
+    if (due > 0) {
+      return { label: 'Review due cards', action: () => startReviewSession() };
+    }
+    if (examBest < 70) {
+      return { label: 'Start timed exam', action: () => startExamSimulator('timed') };
+    }
+    return { label: 'Drill weakest domain', action: () => startWeakestDomainDrill() };
+  }
+
+  function startWeakestDomainDrill() {
+    // Use module quizzes from weakest domain
+    const scores = computeDomainScores(state);
+    const entries = Object.entries(scores);
+    if (!entries.length) { alert('No domain data yet. Try a module quiz first.'); return; }
+    const weakest = entries.sort((a,b)=>a[1]-b[1])[0][0];
+    const questions = moduleQuizzes[weakest] || [];
+    if (!questions.length) { alert('No questions available for weakest domain.'); return; }
+    runInlineDrill(questions, `Weakest domain drill (${weakest})`);
+  }
+
+  // ---------- Quick Checks & Gating ----------
+  function renderQuickChecks() {
+    modules.forEach(m => {
+      const modEl = document.getElementById(m.id);
+      if (!modEl) return;
+      modEl.style.position = 'relative';
+      const existing = modEl.querySelector('.quick-check');
+      if (existing) existing.remove();
+      const qc = document.createElement('div');
+      qc.className = 'section-card quick-check';
+      const isComplete = state.quickChecks.completed[m.id];
+      const skipUsed = state.quickChecks.skips[m.id];
+      qc.innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h3 class="text-lg font-semibold">Quick Check (3 questions)</h3>
+            <p class="text-sm text-slate-600">Unlock Learn by answering or skip once.</p>
+          </div>
+          <div class="pill ${isComplete ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+            ${isComplete ? 'Unlocked' : 'Locked'}
+          </div>
+        </div>
+        <div class="mt-3 text-sm text-slate-800" id="qc-question-${m.id}"></div>
+        <div class="mt-3 flex flex-col gap-2" id="qc-options-${m.id}"></div>
+        <div class="flex gap-2 mt-3">
+          <button class="btn btn-secondary" id="qc-skip-${m.id}" ${skipUsed ? 'disabled' : ''}>Skip once</button>
+          <button class="btn" id="qc-recall-${m.id}">Go to Recall</button>
+        </div>
+      `;
+      modEl.insertBefore(qc, modEl.children[1] || null);
+      const siblings = Array.from(modEl.children).slice(2); // after header + qc
+      siblings.forEach(el => el.classList.add('locked-body'));
+      gateModule(modEl, isComplete || skipUsed);
+      bindQuickCheck(m, qc);
+    });
+  }
+
+  function gateModule(modEl, unlocked) {
+    if (unlocked) {
+      modEl.classList.remove('module-locked');
+      modEl.querySelectorAll('.locked-overlay')?.forEach(el=>el.remove());
+      return;
+    }
+    modEl.classList.add('module-locked');
+    if (!modEl.querySelector('.locked-overlay')) {
+      const overlay = document.createElement('div');
+      overlay.className = 'locked-overlay';
+      overlay.style.position = 'absolute';
+      overlay.style.inset = '0';
+      overlay.style.background = 'rgba(255,255,255,0.7)';
+      overlay.style.backdropFilter = 'blur(2px)';
+      overlay.style.display = 'flex';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+      overlay.innerHTML = '<p class="text-slate-700 font-semibold">Complete Quick Check or Skip once to unlock Learn.</p>';
+      modEl.appendChild(overlay);
+    }
+  }
+
+  function bindQuickCheck(module, container) {
+    const questions = quickCheckQuestions[module.id] || [];
+    if (!questions.length) return;
+    let idx = 0;
+    renderQC();
+
+    function renderQC() {
+      const q = questions[idx];
+      const qEl = container.querySelector(`#qc-question-${module.id}`);
+      const optEl = container.querySelector(`#qc-options-${module.id}`);
+      if (!qEl || !optEl) return;
+      qEl.textContent = `${idx+1}/${questions.length}: ${q.q}`;
+      optEl.innerHTML = '';
+      q.options.forEach((opt,i)=>{
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-secondary';
+        btn.textContent = opt;
+        btn.onclick = () => handleAnswer(i === q.answer, q.explain || '');
+        optEl.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(correct, explain) {
+      alert(`${correct ? 'Correct' : 'Incorrect'}${explain ? ': '+explain : ''}`);
+      idx += 1;
+      if (idx >= questions.length) {
+        state.quickChecks.completed[module.id] = true;
+        saveState();
+        renderMasteryHUD();
+        renderQuickChecks();
+      } else {
+        renderQC();
+      }
+    }
+
+    container.querySelector(`#qc-skip-${module.id}`)?.addEventListener('click', () => {
+      state.quickChecks.skips[module.id] = true;
+      saveState();
+      renderMasteryHUD();
+      renderQuickChecks();
+    });
+    container.querySelector(`#qc-recall-${module.id}`)?.addEventListener('click', () => {
+      const recall = container.parentElement.querySelector('[id^="recall-"]');
+      recall?.scrollIntoView({ behavior:'smooth' });
+    });
+  }
+  function runInlineDrill(questions, title='Drill') {
+    const start = Date.now();
+    let correct = 0;
+    questions.forEach((q, idx) => {
+      const choice = prompt(`${title} Q${idx+1}/${questions.length}: ${q.q}\n${q.options.map((o,i)=>`${i+1}. ${o}`).join('\n')}`) || '';
+      if (Number(choice)-1 === q.answer) {
+        correct += 1;
+        alert('Correct');
+      } else {
+        alert(`Incorrect. ${q.options[q.answer]} — ${q.explain || ''}`);
+      }
+    });
+    const score = Math.round((correct / questions.length) * 100);
+    alert(`${title} complete: ${score}% in ${Math.round((Date.now()-start)/1000)}s`);
+  }
+
+  function renderExamResults(attempt) {
+    const containerId = 'exam-results-panel';
+    document.getElementById(containerId)?.remove();
+    const panel = document.createElement('div');
+    panel.id = containerId;
+    panel.className = 'section-card mt-4';
+    const weakTags = Object.entries(attempt.wrongByTag || {}).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
+    const highConfList = (attempt.wrongIds || []).filter(id => (attempt.confidenceById?.[id] || 0) >= 4);
+    panel.innerHTML = `
+      <h3 class="text-lg font-semibold">Exam Results (${attempt.mode})</h3>
+      <p class="text-sm text-slate-700">Score: ${attempt.scorePct}% · Time: ${attempt.durationSec}s · Pace: ${attempt.timePerQuestionSecAvg}s/q</p>
+      <p class="text-sm text-slate-700">High-confidence errors: ${attempt.highConfidenceErrors}</p>
+      <p class="text-sm text-slate-700">Weak domains: ${weakTags.join(', ') || 'None'}</p>
+      <p class="text-sm text-slate-700">Flagged: ${(attempt.flaggedIds||[]).length} | High-conf wrong IDs: ${highConfList.join(', ') || 'None'}</p>
+      <div class="flex gap-2 mt-3 flex-wrap">
+        <button class="btn btn-secondary" type="button" id="mistakes-drill-btn">Mistakes-Only Drill</button>
+        <button class="btn btn-secondary" type="button" id="weak-tags-drill-btn">Generate 10-question Drill</button>
+        <button class="btn btn-secondary" type="button" id="weak-cards-btn">Review Related Cards</button>
+      </div>
+    `;
+    const rz = document.querySelector('#readiness-zone-heading')?.parentElement?.parentElement;
+    rz?.appendChild(panel);
+    document.getElementById('mistakes-drill-btn')?.addEventListener('click', () => startMistakesDrill(attempt));
+    document.getElementById('weak-tags-drill-btn')?.addEventListener('click', () => startWeakTagDrill(weakTags));
+    document.getElementById('weak-cards-btn')?.addEventListener('click', () => startReviewSession(weakTags));
+  }
+
+  function startMistakesDrill(attempt) {
+    const missed = examQuestions.filter(q => (attempt.wrongIds || []).includes(q.id));
+    if (!missed.length) { alert('No mistakes to drill.'); return; }
+    runInlineDrill(missed, 'Mistakes-only drill');
+  }
+
+  function startWeakTagDrill(weakTags=[]) {
+    const pool = examQuestions.filter(q => !weakTags.length || (q.tags||[]).some(t => weakTags.includes(t)));
+    const set = [];
+    while (set.length < 10) set.push(pool[set.length % pool.length]);
+    runInlineDrill(set, 'Weak-tag drill');
   }
 
   function renderPassProbability() {
@@ -1607,6 +1869,39 @@
     ]
   };
 
+  const quickCheckQuestions = {
+    m1: [
+      { q:'Biggest hazard in fiber work?', options:['Lasers','Fiber shards','Chemicals','Noise'], answer:1, explain:'Module safety lists fiber shards as #1 hazard.' },
+      { q:'Fiber optics operates at which OSI layer?', options:['Layer 2','Layer 1','Layer 3','Layer 4'], answer:1, explain:'Physical layer transmission of light.' },
+      { q:'Under tension, bend radius should be?', options:['10×','20×','30×','40×'], answer:3, explain:'Spec: 40× diameter under tension.' },
+    ],
+    m2: [
+      { q:'Lowest loss wavelength?', options:['850 nm','1310 nm','1550 nm','1625 nm'], answer:2, explain:'1550 nm ~0.25 dB/km (lowest loss).' },
+      { q:'MM loss @850 nm?', options:['0.25 dB/km','1.0 dB/km','3.0 dB/km','0.75 dB/km'], answer:2, explain:'Table shows ~3.0 dB/km.' },
+      { q:'Margin required for pass?', options:['0 dB','1 dB','3 dB','6 dB'], answer:2, explain:'Need ≥3 dB margin beyond loss budget.' },
+    ],
+    m3: [
+      { q:'OM5 jacket color?', options:['Aqua','Lime','Black','Beige'], answer:1, explain:'OM5 is lime; OM3/4 aqua.' },
+      { q:'OM1 jacket color?', options:['Beige','Black','Aqua','Lime'], answer:0, explain:'OM1 beige per color code table.' },
+      { q:'OM3/4 jacket color?', options:['Aqua','Blue','Green','Black'], answer:0, explain:'OM3/4 are aqua.' },
+    ],
+    m4: [
+      { q:'APC connector color?', options:['Blue','Green','Aqua','Beige'], answer:1, explain:'APC is green; UPC blue.' },
+      { q:'Fusion splice typical loss?', options:['0.05–0.1 dB','0.3–0.5 dB','0.75 dB','1.0 dB'], answer:0, explain:'Fusion splice spec 0.05–0.1 dB.' },
+      { q:'TIA max connector loss?', options:['0.75 dB','1.0 dB','0.3 dB','0.1 dB'], answer:0, explain:'TIA-568 max 0.75 dB.' },
+    ],
+    m5: [
+      { q:'Tier 1 certification tool?', options:['OTDR','OLTS','VFL','Microscope'], answer:1, explain:'OLTS required; OTDR supplemental.' },
+      { q:'OTDR primary purpose?', options:['Certify Tier 1','Troubleshoot/characterize','Color ID','Fusion splice'], answer:1, explain:'OTDR finds/refines events.' },
+      { q:'Reflectance troubleshooting tool?', options:['OLTS','OTDR','VFL','Polishing puck'], answer:1, explain:'Use OTDR for reflectance events.' },
+    ],
+    m6: [
+      { q:'Outdoor cable indoor limit before transition?', options:['10 ft','25 ft','50 ft','100 ft'], answer:2, explain:'50 feet indoor limit unless fire-rated.' },
+      { q:'Bend radius under tension?', options:['10×','20×','30×','40×'], answer:3, explain:'40× diameter under tension.' },
+      { q:'Installed bend radius?', options:['10×','20×','30×','40×'], answer:1, explain:'20× diameter installed/resting.' },
+    ],
+  };
+
   // Build 25 exam questions from combined pools (reusing facts)
   const examQuestions = (() => {
     const pool = [
@@ -1632,10 +1927,9 @@
       { q:'Power budget formula uses?', options:['Tx + Rx','Tx - Rx sensitivity','Length x loss','Rx - Tx'], answer:1, tags:['loss-budget'] },
       { q:'Margin default recommended?', options:['1 dB','3 dB','6 dB','0 dB'], answer:1, tags:['testing'] },
     ];
-    // Ensure 25 questions; if more, slice; if fewer, reuse.
     const out = [];
     while (out.length < 25) out.push(pool[out.length % pool.length]);
-    return out.slice(0,25);
+    return out.slice(0,25).map((q, i) => ({ ...q, id: `eq-${i}` }));
   })();
 
   // ---------- DOM helpers ----------
@@ -1822,7 +2116,7 @@
     s.dueDateISO = due.toISOString();
     s.lastReviewedISO = new Date().toISOString();
     saveState();
-    renderPassProbability();
+    renderMasteryHUD();
   }
 
   function countDueCards() {
@@ -1887,10 +2181,12 @@
   }
 
   // ---------- Review session ----------
-  function startReviewSession() {
+  function startReviewSession(filterTags) {
     const due = flashcards.filter(c => {
       const st = ensureCardStats(c.id);
-      return new Date(st.dueDateISO).getTime() <= Date.now();
+      const isDue = new Date(st.dueDateISO).getTime() <= Date.now();
+      const matches = !filterTags || filterTags.some(t => c.tags.includes(t));
+      return isDue && matches;
     });
     if (!due.length) {
       alert('No due cards. Great job!');
@@ -1926,6 +2222,8 @@
         if (idx >= due.length) {
           container.querySelector('#review-card').innerHTML = '<p class="font-semibold text-emerald-600">Session complete!</p>';
           updateReadiness();
+          renderMasteryHUD();
+          container.scrollIntoView({ behavior: 'smooth' });
         } else {
           renderCard();
         }
@@ -1946,6 +2244,7 @@
     state.quizAttempts.diagnostic.push({ dateISO: new Date().toISOString(), scorePct, byTag: {}, weakTags });
     saveState();
     alert(`Diagnostic complete: ${scorePct}%`);
+    renderMasteryHUD();
   }
 
   function deriveWeakTags(questions, scorePct) {
@@ -1993,32 +2292,84 @@
         state.quizAttempts.moduleQuizzes[modId].push({ dateISO: new Date().toISOString(), scorePct, wrongByTag: {} });
         wrap.querySelector(`#quiz-result-${modId}`).textContent = `Score: ${scorePct}%`;
         saveState();
+        renderMasteryHUD();
       };
     });
   }
 
   // ---------- Exam simulator ----------
-  function startExamSimulator() {
-    const shuffled = [...examQuestions].sort(() => Math.random() - 0.5);
-    let correct = 0;
+  function startExamSimulator(mode = 'timed') {
+    const questions = [...examQuestions].sort(() => Math.random() - 0.5);
     const start = Date.now();
-    shuffled.forEach((q, idx) => {
-      const choice = prompt(`Q${idx+1}/${shuffled.length}: ${q.q}\n${q.options.map((o,i)=>`${i+1}. ${o}`).join('\n')}`) || '';
-      if (Number(choice)-1 === q.answer) correct += 1;
-    });
+    const answers = {};
+    const flagged = new Set();
+    const confidenceById = {};
+
+    function askQuestion(q, idx, allowFeedback) {
+      const choiceRaw = prompt(`(${mode}) Q${idx+1}/${questions.length}: ${q.q}\n${q.options.map((o,i)=>`${i+1}. ${o}`).join('\n')}`) || '';
+      const choice = Number(choiceRaw) - 1;
+      const conf = Number(prompt('Confidence 1-5?') || 3);
+      if (mode === 'simulation') {
+        const flag = confirm('Flag for review? OK = Flag, Cancel = No');
+        if (flag) flagged.add(q.id);
+      }
+      answers[q.id] = choice;
+      confidenceById[q.id] = clamp(conf,1,5);
+      if (allowFeedback) {
+        const correct = choice === q.answer;
+        alert(`${correct ? 'Correct' : 'Incorrect'}${correct ? '' : ` · Answer: ${q.options[q.answer]}`}`);
+      }
+    }
+
+    questions.forEach((q, idx) => askQuestion(q, idx, mode === 'practice'));
+
+    if (mode === 'simulation' && flagged.size) {
+      if (confirm('Review flagged questions now?')) {
+        [...flagged].forEach(fId => {
+          const q = questions.find(x => x.id === fId);
+          const idx = questions.indexOf(q);
+          askQuestion(q, idx, false);
+        });
+      }
+    }
+
     const durationSec = Math.round((Date.now() - start)/1000);
-    const scorePct = Math.round((correct / shuffled.length) * 100);
-    state.quizAttempts.examSimulator.push({
+    let correct = 0;
+    const wrongIds = [];
+    const wrongByTag = {};
+    let highConfidenceErrors = 0;
+
+    questions.forEach(q => {
+      const chosen = answers[q.id];
+      const isCorrect = chosen === q.answer;
+      if (isCorrect) correct += 1;
+      else wrongIds.push(q.id);
+      (q.tags || []).forEach(t => {
+        wrongByTag[t] = wrongByTag[t] || 0;
+        if (!isCorrect) wrongByTag[t] += 1;
+      });
+      if (!isCorrect && (confidenceById[q.id] || 0) >= 4) highConfidenceErrors += 1;
+    });
+
+    const scorePct = Math.round((correct / questions.length) * 100);
+    const attempt = {
       dateISO: new Date().toISOString(),
+      mode,
       scorePct,
       durationSec,
-      wrongByTag: {},
-      flaggedCount: 0,
+      totalQuestions: questions.length,
+      wrongIds,
+      wrongByTag,
+      flaggedIds: [...flagged],
+      confidenceById,
+      highConfidenceErrors,
+      timePerQuestionSecAvg: Math.round(durationSec / questions.length),
       bestScorePctSnapshot: Math.max(scorePct, Math.max(0,...state.quizAttempts.examSimulator.map(a=>a.scorePct||0)))
-    });
+    };
+    state.quizAttempts.examSimulator.push(attempt);
     saveState();
-    renderPassProbability();
-    alert(`Exam complete: ${scorePct}% in ${durationSec}s`);
+    renderMasteryHUD();
+    renderExamResults(attempt);
   }
 
   // ---------- Tools / calculators ----------
@@ -2163,7 +2514,9 @@
     qs('#start-review')?.addEventListener('click', startReviewSession);
     qs('#start-diagnostic')?.addEventListener('click', runDiagnostic);
     qs('#diagnostic-start-cta')?.addEventListener('click', runDiagnostic);
-    qs('#start-exam')?.addEventListener('click', startExamSimulator);
+    qs('#start-exam-practice')?.addEventListener('click', () => startExamSimulator('practice'));
+    qs('#start-exam-timed')?.addEventListener('click', () => startExamSimulator('timed'));
+    qs('#start-exam-sim')?.addEventListener('click', () => startExamSimulator('simulation'));
     qs('#next-color-drill')?.addEventListener('click', nextColorDrill);
     qs('#trap-trainer')?.addEventListener('click', renderTrap);
     qs('#bend-drill')?.addEventListener('click', renderBend);
@@ -2175,7 +2528,8 @@
     qs('#print-toggle')?.addEventListener('click', togglePrintMode);
     // Restore print toggle state
     document.body.classList.toggle('print-mode', state.settings.printMode);
-    renderPassProbability();
+    renderMasteryHUD();
+    renderQuickChecks();
   }
 
   document.addEventListener('DOMContentLoaded', init);
