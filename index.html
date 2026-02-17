@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOA Badge in Fiber Optics | Test-Ready Mastery Course</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind CDN config: extend primary color only; no plugins/build needed.
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#0f172a"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @media print {
+      @page {
+        size: letter;
+        margin: 0.75in;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      .no-break {
+        page-break-inside: avoid;
+      }
+      .print-hide {
+        display: none;
+      }
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.6;
+    }
+    .callout {
+      border-left: 4px solid;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+    .quiz-answer {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border-radius: 0.25rem;
+    }
+    /* App shell + accessibility helpers */
+    .app-shell {
+      position: relative;
+      min-height: 100vh;
+      background: #f8fafc;
+    }
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(6px);
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+    }
+    .progress-track {
+      width: 180px;
+      height: 0.5rem;
+      background: rgba(148, 163, 184, 0.4);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #22d3ee, #a855f7);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .readiness-pill {
+      background: rgba(34, 197, 94, 0.15);
+      color: #bbf7d0;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .sidebar {
+      position: fixed;
+      top: 3.25rem;
+      left: 0;
+      width: 270px;
+      bottom: 0;
+      background: #0f172a;
+      color: white;
+      overflow-y: auto;
+      padding: 1rem;
+      transform: translateX(0);
+      transition: transform 0.3s ease;
+      z-index: 40;
+    }
+    .sidebar.mobile-hidden {
+      transform: translateX(-100%);
+    }
+    .sidebar a {
+      display: block;
+      color: #e2e8f0;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .sidebar a:focus-visible,
+    .sidebar a.active {
+      outline: 2px solid #22d3ee;
+      outline-offset: 2px;
+      background: rgba(34, 211, 238, 0.1);
+      color: #22d3ee;
+    }
+    .main-content {
+      margin-left: 0;
+      padding: 0;
+    }
+    @media (min-width: 1024px) {
+      .main-content {
+        margin-left: 270px;
+      }
+    }
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 30;
+      display: none;
+    }
+    .drawer-backdrop.show {
+      display: block;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .section-card {
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e2e8f0;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .interactive-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.5rem;
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn:hover { background: #0284c7; }
+    .btn:focus-visible { outline: 2px solid #22d3ee; outline-offset: 2px; }
+    .btn-secondary {
+      background: #1e293b;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip-link:focus {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: #22d3ee;
+      color: #0f172a;
+      padding: 0.5rem 1rem;
+      z-index: 60;
+    }
+    .print-toggle {
+      background: #0ea5e9;
+    }
+    /* Print mode tweaks */
+    body.print-mode .interactive-only {
+      display: none !important;
+    }
+    body.print-mode .revealed-answer,
+    body.print-mode .flashcard-answer {
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    body.print-mode .quiz-option.correct {
+      background: #dcfce7 !important;
+      border-color: #22c55e !important;
+    }
+    /* Legacy page-break helpers kept intact */
+    @media print {
+      body {
+        background: white;
+      }
+      .sidebar,
+      .top-bar,
+      .drawer-backdrop,
+      .interactive-only {
+        display: none !important;
+      }
+      .main-content {
+        margin: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<!-- Skip to content for accessibility -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- App Shell -->
+<div class="app-shell">
+  <header class="top-bar print-hide" role="banner">
+    <button id="mobile-nav-toggle" class="btn btn-secondary lg:hidden" aria-expanded="false" aria-controls="sidebar">
+      ☰ Menu
+    </button>
+    <div class="flex items-center gap-2 font-semibold">
+      <span>FOA Mastery</span>
+      <span class="pill">Badge Prep</span>
+    </div>
+    <div class="flex items-center gap-3 ml-auto">
+      <div class="flex flex-col">
+        <span class="text-xs text-slate-200">Progress</span>
+        <div class="progress-track" aria-label="Course progress">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+      </div>
+      <div class="flex flex-col items-start">
+        <span class="text-xs text-slate-200">Readiness</span>
+        <div id="readiness-pill" class="readiness-pill" aria-live="polite">0% · Not Ready</div>
+      </div>
+      <button id="print-toggle" class="btn print-toggle interactive-only" type="button">🖨 Print/PDF Mode</button>
+      <button id="export-progress" class="btn btn-secondary interactive-only" type="button">⤴ Export</button>
+      <label class="btn btn-secondary cursor-pointer interactive-only">
+        ⤵ Import
+        <input id="import-progress" type="file" accept="application/json" class="sr-only">
+      </label>
+      <button id="reset-progress" class="btn btn-secondary interactive-only" type="button">↺ Reset</button>
+    </div>
+  </header>
+
+  <nav id="sidebar" class="sidebar mobile-hidden print-hide" aria-label="Section navigation">
+    <div class="text-sm text-slate-300 mb-2">Navigate</div>
+    <div id="nav-links" class="flex flex-col gap-1"></div>
+    <div class="mt-4 text-sm text-slate-300">Review</div>
+    <div class="flex flex-col gap-1" id="review-links"></div>
+  </nav>
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+  <!-- Continue banner -->
+  <div id="continue-banner" class="print-hide" style="display:none; position: sticky; top: 3.25rem; z-index:45; background:#e0f2fe; border-bottom:1px solid #bae6fd; padding:0.75rem 1rem;">
+    <div class="flex items-center justify-between gap-2">
+      <div class="text-slate-800 font-semibold">Continue where you left off?</div>
+      <div class="flex gap-2">
+        <button id="continue-btn" class="btn" type="button">Continue</button>
+        <button id="dismiss-continue" class="btn btn-secondary" type="button">Start fresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Readiness Zone / Tools Hub (interactive layer, keeps original content intact below) -->
+  <main id="main-content" class="main-content">
+    <section class="section-card print-hide" aria-labelledby="readiness-zone-heading" style="margin: 1rem;">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 id="readiness-zone-heading" class="text-xl font-bold text-slate-900">Readiness Zone</h2>
+          <p class="text-sm text-slate-600">Diagnostic, review queue, exam simulator, and trainers.</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="start-diagnostic" class="btn" type="button">Start Diagnostic</button>
+          <button id="start-review" class="btn btn-secondary" type="button">Review Now</button>
+          <button id="start-exam" class="btn btn-secondary" type="button">Exam Simulator</button>
+        </div>
+      </div>
+      <div class="interactive-grid mt-4">
+        <div class="section-card">
+          <h3 class="text-lg font-semibold">Due Cards</h3>
+          <p class="text-sm text-slate-600">Spaced repetition queue.</p>
+          <div class="text-2xl font-bold" id="due-count">0</div>
+          <button id="review-now" class="btn mt-3" type="button">Review Now</button>
+        </div>
+        <div class="section-card">
+          <h3 class="text-lg font-semibold">Diagnostic Status</h3>
+          <div id="diagnostic-status" class="text-sm text-slate-700">Not started</div>
+          <button id="diagnostic-start-cta" class="btn mt-3" type="button">Run Diagnostic</button>
+        </div>
+        <div class="section-card">
+          <h3 class="text-lg font-semibold">Exam Best</h3>
+          <div id="exam-best" class="text-2xl font-bold text-emerald-600">0%</div>
+          <p class="text-sm text-slate-600" id="exam-last"></p>
+        </div>
+        <div class="section-card">
+          <h3 class="text-lg font-semibold">Next Recommended Action</h3>
+          <div id="next-action" class="text-sm text-slate-800">Review due cards to improve mastery.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tools / Trainers -->
+    <section class="section-card print-hide" style="margin: 1rem;" aria-labelledby="tools-heading">
+      <h2 id="tools-heading" class="text-xl font-bold text-slate-900 mb-2">Tools & Trainers</h2>
+      <div class="interactive-grid">
+        <div class="section-card">
+          <h3 class="font-semibold">Loss Budget Calculator</h3>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <label>Tx (dBm)<input id="calc-tx" type="number" class="w-full border rounded px-2 py-1" value="0"></label>
+            <label>Rx Sens (dBm)<input id="calc-rx" type="number" class="w-full border rounded px-2 py-1" value="-20"></label>
+            <label>Length (km)<input id="calc-length" type="number" class="w-full border rounded px-2 py-1" value="2"></label>
+            <label>Fiber loss (dB/km)<input id="calc-fiber" type="number" class="w-full border rounded px-2 py-1" value="0.4"></label>
+            <label>Connectors (#)<input id="calc-conn-count" type="number" class="w-full border rounded px-2 py-1" value="2"></label>
+            <label>Conn loss each (dB)<input id="calc-conn-loss" type="number" class="w-full border rounded px-2 py-1" value="0.5"></label>
+            <label>Splices (#)<input id="calc-splice-count" type="number" class="w-full border rounded px-2 py-1" value="2"></label>
+            <label>Splice loss each (dB)<input id="calc-splice-loss" type="number" class="w-full border rounded px-2 py-1" value="0.1"></label>
+            <label>Margin (dB)<input id="calc-margin" type="number" class="w-full border rounded px-2 py-1" value="3"></label>
+          </div>
+          <div class="mt-3 text-sm space-y-1" id="calc-output"></div>
+        </div>
+        <div class="section-card">
+          <h3 class="font-semibold">Connector Color Trainer</h3>
+          <div class="text-sm" id="color-trainer"></div>
+          <button id="next-color-drill" class="btn mt-2" type="button">Next Drill</button>
+        </div>
+        <div class="section-card">
+          <h3 class="font-semibold">OLTS vs OTDR Trap Trainer</h3>
+          <div class="text-sm" id="trap-trainer"></div>
+          <div class="flex gap-2 mt-2">
+            <button data-choice="OLTS" class="btn btn-secondary" type="button">OLTS</button>
+            <button data-choice="OTDR" class="btn btn-secondary" type="button">OTDR</button>
+          </div>
+        </div>
+        <div class="section-card">
+          <h3 class="font-semibold">Bend Radius Drill</h3>
+          <div class="text-sm" id="bend-drill"></div>
+          <div class="flex gap-2 mt-2">
+            <button data-bend="40x" class="btn btn-secondary" type="button">40×</button>
+            <button data-bend="20x" class="btn btn-secondary" type="button">20×</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div style="min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #312e81 50%, #0f172a 100%); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem;">
+  <div style="text-align: center; max-width: 48rem;">
+    
+    <!-- Badge Icon -->
+    <div style="margin-bottom: 1.5rem;">
+      <svg style="width: 6rem; height: 6rem; margin: 0 auto; color: #34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+    </div>
+    
+    <h1 style="font-size: 3rem; font-weight: bold; margin-bottom: 1rem;">FOA Badge in Fiber Optics</h1>
+    <p style="font-size: 1.5rem; color: #a5b4fc; margin-bottom: 1.5rem;">Test-Ready Mastery Course</p>
+    
+    <div style="background: rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 2rem;">
+      <p style="font-size: 1.25rem; color: #6ee7b7; font-weight: 600; margin-bottom: 0.5rem;">Your Outcome</p>
+      <p style="font-size: 1.125rem;">Pass the FOA Badge exam with confidence.<br>Master fiber optics from fundamentals to installation.</p>
+    </div>
+    
+    <!-- Learning Path Bar -->
+    <div style="margin-bottom: 2rem;">
+      <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 0.75rem;">Learning Path</p>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;">
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">1. Fundamentals</span>
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">2. Safety</span>
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">3. Transmission</span>
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">4. Fiber</span>
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">5. Connectors</span>
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">6. Testing</span>
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">7. Cable</span>
+        <span style="background: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">8. Installation</span>
+      </div>
+    </div>
+    
+    <div style="color: #94a3b8; font-size: 0.875rem;">
+      <p>Version 2.0 | FOA Badge Certification Study Guide</p>
+      <p>Prepared for Noble Vanguard Cyber Defense Advisory</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  <h2 style="font-size: 1.875rem; font-weight: bold; color: #0f172a; margin-bottom: 1.5rem; border-bottom: 4px solid #4f46e5; padding-bottom: 0.5rem;">Table of Contents</h2>
+  
+  <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+      <span style="font-weight: 600;">Executive Learning Map</span>
+      <span style="color: #64748b;">Page 3</span>
+    </div>
+    
+    <div style="margin-top: 1rem; margin-bottom: 0.5rem;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #4f46e5; font-weight: bold;">Modules</span>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; padding-left: 1rem;">
+      <span><span style="color: #4f46e5; font-weight: bold;">Module 1:</span> Fiber Optics Fundamentals & Safety</span>
+      <span style="color: #64748b;">Page 5</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; padding-left: 1rem;">
+      <span><span style="color: #4f46e5; font-weight: bold;">Module 2:</span> Transmission Systems & Components</span>
+      <span style="color: #64748b;">Page 12</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; padding-left: 1rem;">
+      <span><span style="color: #4f46e5; font-weight: bold;">Module 3:</span> Optical Fiber Types & Properties</span>
+      <span style="color: #64748b;">Page 19</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; padding-left: 1rem;">
+      <span><span style="color: #4f46e5; font-weight: bold;">Module 4:</span> Connectors, Termination & Splicing</span>
+      <span style="color: #64748b;">Page 26</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; padding-left: 1rem;">
+      <span><span style="color: #4f46e5; font-weight: bold;">Module 5:</span> Fiber Optic Testing</span>
+      <span style="color: #64748b;">Page 33</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; padding-left: 1rem;">
+      <span><span style="color: #4f46e5; font-weight: bold;">Module 6:</span> Cable Types & Installation</span>
+      <span style="color: #64748b;">Page 40</span>
+    </div>
+    
+    <div style="margin-top: 1rem; margin-bottom: 0.5rem;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #10b981; font-weight: bold;">Exam Preparation</span>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+      <span style="font-weight: 600;">Exam Readiness Zone & Practice Exam</span>
+      <span style="color: #64748b;">Page 47</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+      <span style="font-weight: 600;">Cheat Sheets & Quick Reference</span>
+      <span style="color: #64748b;">Page 55</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+      <span style="font-weight: 600;">Glossary</span>
+      <span style="color: #64748b;">Page 60</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== EXECUTIVE LEARNING MAP ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  <h2 style="font-size: 1.875rem; font-weight: bold; color: #0f172a; margin-bottom: 1.5rem; border-bottom: 4px solid #4f46e5; padding-bottom: 0.5rem;">Executive Learning Map</h2>
+  
+  <!-- Course Goals -->
+  <div class="card no-break">
+    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4f46e5; margin-bottom: 1rem;">🎯 Course Goals & Measurable Objectives</h3>
+    <p style="margin-bottom: 1rem;">Upon completing this course, you will be able to:</p>
+    <ul style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <li style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Identify fiber types, cable constructions, and connector styles on sight</span>
+      </li>
+      <li style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Calculate loss budgets and verify link performance</span>
+      </li>
+      <li style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Select appropriate termination and splicing methods for any scenario</span>
+      </li>
+      <li style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Use OLTS and OTDR equipment for certification and troubleshooting</span>
+      </li>
+      <li style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Apply FOA safety standards and NEC compliance requirements</span>
+      </li>
+      <li style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Pass the FOA Badge examination with confidence</span>
+      </li>
+    </ul>
+  </div>
+  
+  <!-- Fast Track vs Mastery -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+    <div class="card no-break" style="background: #fffbeb; border-left: 4px solid #f59e0b;">
+      <h3 style="font-size: 1.125rem; font-weight: bold; color: #92400e; margin-bottom: 0.75rem;">⚡ If You Have 60 Minutes</h3>
+      <p style="font-size: 0.875rem; color: #b45309; margin-bottom: 0.75rem;">Focus on these high-yield topics:</p>
+      <ol style="font-size: 0.875rem; display: flex; flex-direction: column; gap: 0.25rem;">
+        <li>1. Fiber types: MM vs SM, OM grades (10 min)</li>
+        <li>2. Attenuation values by wavelength (5 min)</li>
+        <li>3. Connector types and color codes (10 min)</li>
+        <li>4. Bend radius specs: 40×/20× (5 min)</li>
+        <li>5. Loss budget calculation (10 min)</li>
+        <li>6. OLTS vs OTDR purpose (10 min)</li>
+        <li>7. Safety hierarchy (5 min)</li>
+        <li>8. Review Cheat Sheets (5 min)</li>
+      </ol>
+    </div>
+    
+    <div class="card no-break" style="background: #ecfdf5; border-left: 4px solid #10b981;">
+      <h3 style="font-size: 1.125rem; font-weight: bold; color: #065f46; margin-bottom: 0.75rem;">🏆 If You Want Mastery</h3>
+      <p style="font-size: 0.875rem; color: #047857; margin-bottom: 0.75rem;">Complete path (10-15 hours):</p>
+      <ol style="font-size: 0.875rem; display: flex; flex-direction: column; gap: 0.25rem;">
+        <li>1. All 6 modules with quizzes</li>
+        <li>2. Watch all FOA lecture videos</li>
+        <li>3. Complete all online FOA quizzes</li>
+        <li>4. Practice loss budget calculations</li>
+        <li>5. Master all 25+ exam questions</li>
+        <li>6. Memorize glossary terms</li>
+        <li>7. Review field checklists</li>
+        <li>8. Take practice exam 3× (score 90%+)</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODULE 1: FUNDAMENTALS & SAFETY ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <!-- Module Header -->
+  <div style="background: #4f46e5; color: white; padding: 1.5rem; border-radius: 0.75rem 0.75rem 0 0;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.2); border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">1</div>
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Fiber Optics Fundamentals & Safety</h2>
+        <p style="color: #c7d2fe;">The foundation of everything that follows</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Why It Matters -->
+  <div class="card no-break" style="border-top: none; border-radius: 0 0 0.5rem 0.5rem;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #e11d48; margin-bottom: 0.75rem;">🔥 Why This Matters</h3>
+    <p>Fiber optics is the backbone of modern communications. Understanding fundamentals means you can troubleshoot problems, design networks, and protect yourself and others from real hazards. <strong>Safety knowledge prevents injuries</strong>—fiber shards are the #1 hazard, not lasers as most people assume.</p>
+  </div>
+  
+  <!-- Core Concepts -->
+  <div class="card no-break">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #4f46e5; margin-bottom: 0.75rem;">📚 Core Concepts</h3>
+    
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem;">
+        <h4 style="font-weight: bold; color: #1e293b;">What is Fiber Optics?</h4>
+        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Fiber optics is the transmission of information as light pulses through thin glass or plastic strands (fibers). It operates at <strong>OSI Layer 1 (Physical Layer)</strong>—the same layer as copper cabling, but with dramatically better performance.</p>
+      </div>
+      
+      <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem;">
+        <h4 style="font-weight: bold; color: #1e293b;">Fiber vs. Copper Advantages</h4>
+        <table style="font-size: 0.875rem; margin-top: 0.5rem;">
+          <tr>
+            <th style="text-align: left;">Factor</th>
+            <th style="text-align: left;">Fiber</th>
+            <th style="text-align: left;">Copper</th>
+          </tr>
+          <tr>
+            <td>Distance</td>
+            <td style="color: #10b981; font-weight: 600;">1000× greater</td>
+            <td>Limited</td>
+          </tr>
+          <tr>
+            <td>Bandwidth</td>
+            <td style="color: #10b981; font-weight: 600;">Virtually unlimited</td>
+            <td>Limited by frequency</td>
+          </tr>
+          <tr>
+            <td>EMI Immunity</td>
+            <td style="color: #10b981; font-weight: 600;">Complete</td>
+            <td>Susceptible</td>
+          </tr>
+          <tr>
+            <td>Power (Data Center)</td>
+            <td style="color: #10b981; font-weight: 600;">20% of Cat 6</td>
+            <td>High consumption</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ELI7 -->
+  <div class="callout no-break" style="background: #fffbeb; border-color: #f59e0b;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #92400e; margin-bottom: 0.5rem;">🧒 Explain Like I'm 7</h3>
+    <p style="color: #78350f;">Imagine you have a really long, thin glass straw. You shine a flashlight into one end, and the light bounces inside the straw all the way to the other end—even if the straw is curved! That's fiber optics. The "straw" is so thin you could fit 100 of them in one strand of your hair. We use it instead of metal wires because light is faster than electricity and doesn't get confused by magnets or thunderstorms.</p>
+  </div>
+  
+  <!-- Safety Section -->
+  <div class="card no-break" style="background: #fff1f2; border: 2px solid #fb7185;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #e11d48; margin-bottom: 0.75rem;">⚠️ CRITICAL: Safety Hierarchy</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 1rem;">Most people think lasers are the biggest danger. <strong>They're wrong.</strong></p>
+    
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; background: white; padding: 0.75rem; border-radius: 0.25rem; border-left: 4px solid #e11d48;">
+        <span style="font-size: 1.5rem; font-weight: bold; color: #e11d48;">#1</span>
+        <div>
+          <strong style="color: #9f1239;">FIBER SHARDS</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">Glass splinters from cleaving. Can pierce skin, embed invisibly, cause infection.</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; background: white; padding: 0.75rem; border-radius: 0.25rem; border-left: 4px solid #f59e0b;">
+        <span style="font-size: 1.5rem; font-weight: bold; color: #d97706;">#2</span>
+        <div>
+          <strong style="color: #92400e;">CHEMICALS</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">Isopropyl alcohol (flammable), epoxies, cleaning solvents.</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; background: white; padding: 0.75rem; border-radius: 0.25rem; border-left: 4px solid #818cf8;">
+        <span style="font-size: 1.5rem; font-weight: bold; color: #4f46e5;">#3</span>
+        <div>
+          <strong style="color: #3730a3;">HIGH-POWER LASERS</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">CATV, DWDM systems. Always verify "dark" before microscope inspection.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODULE 2: TRANSMISSION ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <div style="background: #4f46e5; color: white; padding: 1.5rem; border-radius: 0.75rem 0.75rem 0 0;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.2); border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">2</div>
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Transmission Systems & Components</h2>
+        <p style="color: #c7d2fe;">Sources, detectors, and power budgets</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Wavelengths -->
+  <div class="card no-break" style="background: #eef2ff; border: 2px solid #818cf8;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #4f46e5; margin-bottom: 0.75rem;">📡 Operating Wavelengths (MEMORIZE)</h3>
+    <table style="font-size: 0.875rem;">
+      <tr>
+        <th>Wavelength</th>
+        <th>Fiber Type</th>
+        <th>Typical Loss</th>
+        <th>Application</th>
+      </tr>
+      <tr>
+        <td><strong>850 nm</strong></td>
+        <td>Multimode</td>
+        <td style="color: #e11d48;">3.0 dB/km</td>
+        <td>Short runs, data center</td>
+      </tr>
+      <tr>
+        <td><strong>1300/1310 nm</strong></td>
+        <td>MM or SM</td>
+        <td style="color: #d97706;">1.0 dB/km (MM), 0.4 dB/km (SM)</td>
+        <td>Medium distance</td>
+      </tr>
+      <tr>
+        <td><strong>1550 nm</strong></td>
+        <td>Singlemode</td>
+        <td style="color: #10b981; font-weight: bold;">0.25 dB/km (LOWEST)</td>
+        <td>Long-haul, DWDM</td>
+      </tr>
+    </table>
+    <p style="margin-top: 0.75rem; font-size: 0.875rem; color: #3730a3;"><strong>Memory trick:</strong> "1550 is the champion—lowest loss, longest haul"</p>
+  </div>
+  
+  <!-- Power Budget -->
+  <div class="card no-break" style="background: #ecfdf5; border: 2px solid #34d399;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #10b981; margin-bottom: 0.75rem;">🧮 Power Budget Calculation (EXAM CRITICAL)</h3>
+    
+    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+      <p style="text-align: center; font-size: 1.125rem; font-family: monospace;">
+        <strong>Power Budget</strong> = Tx Output (dBm) − Rx Sensitivity (dBm)
+      </p>
+    </div>
+    
+    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+      <p style="text-align: center; font-size: 1.125rem; font-family: monospace;">
+        <strong>Loss Budget</strong> = (Length × dB/km) + (Connectors × dB) + (Splices × dB)
+      </p>
+    </div>
+    
+    <div style="background: white; padding: 1rem; border-radius: 0.5rem;">
+      <p style="text-align: center; font-size: 1.125rem; font-family: monospace; color: #047857; font-weight: bold;">
+        Power Budget > Loss Budget + 3 dB margin
+      </p>
+    </div>
+    
+    <div style="margin-top: 1rem; padding: 0.75rem; background: white; border-radius: 0.25rem; border-left: 4px solid #10b981;">
+      <p style="font-weight: 600; color: #065f46;">Example Problem:</p>
+      <p style="font-size: 0.875rem; margin-top: 0.5rem;">Tx = -3 dBm, Rx sensitivity = -20 dBm<br>
+      Link: 5 km SM @1310nm, 4 connectors, 2 splices</p>
+      <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+        <p><strong>Power Budget:</strong> -3 - (-20) = <strong>17 dB</strong></p>
+        <p><strong>Loss Budget:</strong> (5 × 0.4) + (4 × 0.5) + (2 × 0.1) = 2 + 2 + 0.2 = <strong>4.2 dB</strong></p>
+        <p><strong>Margin:</strong> 17 - 4.2 = <strong>12.8 dB</strong> ✓ (exceeds 3 dB minimum)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODULE 3: FIBER TYPES ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <div style="background: #4f46e5; color: white; padding: 1.5rem; border-radius: 0.75rem 0.75rem 0 0;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.2); border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">3</div>
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Optical Fiber Types & Properties</h2>
+        <p style="color: #c7d2fe;">MM, SM, OM grades, and critical specifications</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- OM Grades -->
+  <div class="card no-break" style="background: #fffbeb; border: 2px solid #f59e0b;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #d97706; margin-bottom: 0.75rem;">🏷️ OM Grades (MEMORIZE)</h3>
+    
+    <table style="font-size: 0.875rem;">
+      <tr>
+        <th>Grade</th>
+        <th>Core</th>
+        <th>Bandwidth @850nm</th>
+        <th>10G Distance</th>
+        <th>Jacket Color</th>
+      </tr>
+      <tr>
+        <td><strong>OM1</strong></td>
+        <td>62.5 µm</td>
+        <td>160-200 MHz·km</td>
+        <td>33m</td>
+        <td style="color: #b45309;">Orange/Beige</td>
+      </tr>
+      <tr>
+        <td><strong>OM2</strong></td>
+        <td>50 µm</td>
+        <td>500 MHz·km</td>
+        <td>82m</td>
+        <td style="color: #b45309;">Orange/Black</td>
+      </tr>
+      <tr>
+        <td><strong>OM3</strong></td>
+        <td>50 µm</td>
+        <td>1500 MHz·km</td>
+        <td>300m</td>
+        <td style="color: #0891b2; font-weight: bold;">Aqua</td>
+      </tr>
+      <tr>
+        <td><strong>OM4</strong></td>
+        <td>50 µm</td>
+        <td>3500 MHz·km</td>
+        <td>400m</td>
+        <td style="color: #0891b2; font-weight: bold;">Aqua</td>
+      </tr>
+      <tr>
+        <td><strong>OM5</strong></td>
+        <td>50 µm</td>
+        <td>3500 MHz·km</td>
+        <td>400m+</td>
+        <td style="color: #65a30d; font-weight: bold;">Lime Green</td>
+      </tr>
+    </table>
+    
+    <p style="margin-top: 0.75rem; font-size: 0.875rem;"><strong>OM3/OM4/OM5 are "laser-optimized"</strong> for VCSEL sources. OM5 adds wideband capability for SWDM.</p>
+  </div>
+  
+  <!-- Attenuation Values -->
+  <div class="card no-break" style="background: #fff1f2; border: 2px solid #fb7185;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #e11d48; margin-bottom: 0.75rem;">📈 Attenuation Values (CRITICAL)</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div style="background: white; padding: 0.75rem; border-radius: 0.25rem;">
+        <p style="font-weight: bold; color: #475569; margin-bottom: 0.5rem;">Multimode</p>
+        <p style="font-size: 1.125rem;">@850 nm: <strong style="color: #e11d48;">3 dB/km</strong></p>
+        <p style="font-size: 1.125rem;">@1300 nm: <strong style="color: #d97706;">1 dB/km</strong></p>
+      </div>
+      <div style="background: white; padding: 0.75rem; border-radius: 0.25rem;">
+        <p style="font-weight: bold; color: #475569; margin-bottom: 0.5rem;">Singlemode</p>
+        <p style="font-size: 1.125rem;">@1310 nm: <strong style="color: #d97706;">0.4 dB/km</strong></p>
+        <p style="font-size: 1.125rem;">@1550 nm: <strong style="color: #10b981;">0.25 dB/km</strong></p>
+      </div>
+    </div>
+    
+    <p style="margin-top: 1rem; font-size: 0.875rem; color: #9f1239;"><strong>Memory trick:</strong> "850 is 3, 1300 is 1, 1310 is 0.4, 1550 is 0.25"</p>
+  </div>
+</div>
+
+<!-- ==================== MODULE 4: CONNECTORS ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <div style="background: #4f46e5; color: white; padding: 1.5rem; border-radius: 0.75rem 0.75rem 0 0;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.2); border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">4</div>
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Connectors, Termination & Splicing</h2>
+        <p style="color: #c7d2fe;">Making reliable connections</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Connector Color Codes -->
+  <div class="card no-break" style="background: #fffbeb; border: 2px solid #f59e0b;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #d97706; margin-bottom: 0.75rem;">🎨 Connector Color Codes (MUST MEMORIZE)</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: #fde68a; border: 2px solid #f59e0b;"></div>
+        <div>
+          <strong>Beige</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">62.5/125 (OM1)</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: #1e293b; border: 2px solid #475569;"></div>
+        <div>
+          <strong>Black</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">50/125 (OM2)</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: #22d3ee; border: 2px solid #0891b2;"></div>
+        <div>
+          <strong>Aqua</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">OM3/OM4</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: #3b82f6; border: 2px solid #1d4ed8;"></div>
+        <div>
+          <strong>Blue</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">Singlemode PC/UPC</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: #22c55e; border: 2px solid #16a34a;"></div>
+        <div>
+          <strong style="color: #16a34a;">GREEN ⚠️</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">Singlemode APC (angled)</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: #a3e635; border: 2px solid #84cc16;"></div>
+        <div>
+          <strong>Lime</strong>
+          <p style="font-size: 0.875rem; color: #64748b;">OM5</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- APC vs PC Warning -->
+  <div class="card no-break" style="background: #fecdd3; border: 2px solid #f43f5e;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #e11d48; margin-bottom: 0.75rem;">🚨 CRITICAL: Never Mix APC and PC!</h3>
+    
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <div>
+        <p style="font-weight: 600; color: #9f1239;">APC (green) has an 8° angle. PC (blue) is flat.</p>
+        <p style="font-size: 0.875rem; color: #be123c; margin-top: 0.5rem;">Mating these together will:</p>
+        <ul style="font-size: 0.875rem; color: #be123c;">
+          <li>• <strong>Physically damage both connector end faces</strong></li>
+          <li>• Cause high loss and high reflectance</li>
+          <li>• Require re-polishing or replacement</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Splicing -->
+  <div class="card no-break">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #4f46e5; margin-bottom: 0.75rem;">⚡ Splicing Comparison</h3>
+    
+    <table style="font-size: 0.875rem;">
+      <tr>
+        <th>Type</th>
+        <th>Equipment Cost</th>
+        <th>Per-Splice Cost</th>
+        <th>Typical Loss</th>
+        <th>Best For</th>
+      </tr>
+      <tr>
+        <td><strong>Fusion</strong></td>
+        <td>$15,000-$40,000</td>
+        <td>$2-5</td>
+        <td style="color: #10b981; font-weight: bold;">0.05-0.1 dB</td>
+        <td>High volume, OSP</td>
+      </tr>
+      <tr>
+        <td><strong>Mechanical</strong></td>
+        <td>$500-$2,000</td>
+        <td>$10-25</td>
+        <td>0.2-0.5 dB</td>
+        <td>Low volume, restoration</td>
+      </tr>
+    </table>
+    
+    <p style="margin-top: 0.75rem; font-size: 0.875rem;"><strong>Breakeven:</strong> ~500 splices justifies fusion splicer purchase</p>
+  </div>
+</div>
+
+<!-- ==================== MODULE 5: TESTING ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <div style="background: #4f46e5; color: white; padding: 1.5rem; border-radius: 0.75rem 0.75rem 0 0;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.2); border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">5</div>
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Fiber Optic Testing</h2>
+        <p style="color: #c7d2fe;">Certification, troubleshooting, and OTDR</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- dB vs dBm -->
+  <div class="card no-break" style="background: #fffbeb; border: 2px solid #f59e0b;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #d97706; margin-bottom: 0.75rem;">📊 CRITICAL: dB vs dBm</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div style="background: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+        <p style="font-size: 1.875rem; font-weight: bold; color: #4f46e5;">dBm</p>
+        <p style="font-weight: 600; margin-top: 0.5rem;">Absolute Power</p>
+        <p style="font-size: 0.875rem; color: #64748b;">Referenced to 1 milliwatt</p>
+        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Example: -3 dBm, -20 dBm</p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #4f46e5;">Use for Tx output, Rx input</p>
+      </div>
+      <div style="background: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+        <p style="font-size: 1.875rem; font-weight: bold; color: #10b981;">dB</p>
+        <p style="font-weight: 600; margin-top: 0.5rem;">Relative Loss</p>
+        <p style="font-size: 0.875rem; color: #64748b;">Difference between two levels</p>
+        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Example: 3.5 dB loss</p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #10b981;">Use for insertion loss</p>
+      </div>
+    </div>
+    
+    <p style="margin-top: 1rem; font-size: 0.875rem; color: #92400e; text-align: center; font-weight: 600;">⚠️ Setting meter to "dB" for absolute power = WRONG READING</p>
+  </div>
+  
+  <!-- OLTS vs OTDR -->
+  <div class="card no-break" style="background: #fff1f2; border-left: 4px solid #e11d48;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #e11d48; margin-bottom: 0.75rem;">⚠️ Common Exam Trap: OLTS vs OTDR</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+      <div style="background: white; padding: 0.75rem; border-radius: 0.25rem;">
+        <p style="font-weight: bold; color: #10b981;">OLTS (Source + Meter)</p>
+        <ul style="margin-top: 0.5rem;">
+          <li>✓ Direct loss measurement</li>
+          <li>✓ <strong>REQUIRED for certification</strong></li>
+          <li>✓ Measures what matters: total loss</li>
+        </ul>
+      </div>
+      <div style="background: white; padding: 0.75rem; border-radius: 0.25rem;">
+        <p style="font-weight: bold; color: #4f46e5;">OTDR</p>
+        <ul style="margin-top: 0.5rem;">
+          <li>• Indirect measurement</li>
+          <li>• Supplementary diagnostic</li>
+          <li>• Great for troubleshooting</li>
+          <li>• Not for short cables (dead zone)</li>
+        </ul>
+      </div>
+    </div>
+    
+    <p style="margin-top: 0.75rem; font-size: 0.875rem; color: #9f1239; font-weight: 600;">❌ "OTDR certifies cable plants" = WRONG. OLTS is required.</p>
+  </div>
+</div>
+
+<!-- ==================== MODULE 6: CABLE & INSTALLATION ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <div style="background: #4f46e5; color: white; padding: 1.5rem; border-radius: 0.75rem 0.75rem 0 0;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.2); border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">6</div>
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Cable Types & Installation</h2>
+        <p style="color: #c7d2fe;">NEC ratings, bend radius, and best practices</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bend Radius -->
+  <div class="card no-break" style="background: #fff1f2; border: 2px solid #f43f5e;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #e11d48; margin-bottom: 0.75rem;">📐 Bend Radius Specifications (CRITICAL)</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+      <div style="background: white; padding: 1rem; border-radius: 0.5rem;">
+        <p style="font-size: 2.5rem; font-weight: bold; color: #e11d48;">40×</p>
+        <p style="font-weight: 600; margin-top: 0.5rem;">Under Tension</p>
+        <p style="font-size: 0.875rem; color: #64748b;">(During pulling)</p>
+      </div>
+      <div style="background: white; padding: 1rem; border-radius: 0.5rem;">
+        <p style="font-size: 2.5rem; font-weight: bold; color: #d97706;">20×</p>
+        <p style="font-weight: 600; margin-top: 0.5rem;">Installed</p>
+        <p style="font-size: 0.875rem; color: #64748b;">(At rest)</p>
+      </div>
+    </div>
+    
+    <p style="margin-top: 1rem; font-size: 0.875rem; text-align: center; font-weight: 600;">× = cable diameter</p>
+    <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #9f1239; text-align: center;">Memory: "40 under tension, 20 at rest"</p>
+  </div>
+  
+  <!-- NEC Ratings -->
+  <div class="card no-break" style="background: #fffbeb; border: 2px solid #f59e0b;">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #d97706; margin-bottom: 0.75rem;">🔥 NEC Fire Ratings (MEMORIZE)</h3>
+    
+    <table style="font-size: 0.875rem;">
+      <tr>
+        <th>Rating</th>
+        <th>Location</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td><strong>OFNP / OFCP</strong></td>
+        <td>Plenum (air handling spaces)</td>
+        <td>Highest fire rating</td>
+      </tr>
+      <tr>
+        <td><strong>OFNR / OFCR</strong></td>
+        <td>Riser (vertical runs)</td>
+        <td>Floor-to-floor</td>
+      </tr>
+      <tr>
+        <td><strong>OFNG / OFCG</strong></td>
+        <td>General purpose</td>
+        <td>Horizontal runs</td>
+      </tr>
+    </table>
+    
+    <div style="margin-top: 1rem; font-size: 0.875rem;">
+      <p><strong>OFN</strong> = Non-conductive (no metal)</p>
+      <p><strong>OFC</strong> = Conductive (has metal, must ground)</p>
+    </div>
+    
+    <p style="margin-top: 0.75rem; font-size: 0.875rem; color: #e11d48; font-weight: 600;">⚠️ Outdoor cable indoors: Maximum 50 feet per NEC</p>
+  </div>
+  
+  <!-- Installation Rules -->
+  <div class="card no-break">
+    <h3 style="font-size: 1.125rem; font-weight: bold; color: #4f46e5; margin-bottom: 0.75rem;">📋 Critical Installation Rules</h3>
+    
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.875rem;">
+      <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Attach pull rope to <strong>strength members (aramid/Kevlar)</strong>, not jacket</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Install fiber <strong>ON TOP of or BELOW</strong> copper in trays (copper crushes fiber)</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span><strong>Call 811</strong> before any excavation (utility locate)</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Use <strong>Figure-8 pattern</strong> during intermediate pulls to prevent twist</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #10b981; font-weight: bold;">✓</span>
+        <span>Firestop every wall/floor penetration</span>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <span style="color: #e11d48; font-weight: bold;">✗</span>
+        <span style="color: #be123c;">NEC requires removal of abandoned cables (fire hazard)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PRACTICE EXAM ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 2rem; border-radius: 0.75rem; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.875rem; font-weight: bold; margin-bottom: 0.5rem;">🎯 Practice Exam</h2>
+    <p style="color: #a7f3d0;">25 questions to test your readiness</p>
+  </div>
+  
+  <div style="display: flex; flex-direction: column; gap: 1rem;">
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">1. What is the minimum bend diameter for cable under tension?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) 10× cable diameter</div>
+        <div>B) 20× cable diameter</div>
+        <div>C) 40× cable diameter</div>
+        <div>D) 50× cable diameter</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">2. Which connector color indicates singlemode APC?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) Blue</div>
+        <div>B) Green</div>
+        <div>C) Aqua</div>
+        <div>D) Yellow</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">3. What is the typical attenuation of multimode fiber at 850nm?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) 0.25 dB/km</div>
+        <div>B) 0.4 dB/km</div>
+        <div>C) 1.0 dB/km</div>
+        <div>D) 3.0 dB/km</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">4. What test is REQUIRED for cable plant certification?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) OTDR only</div>
+        <div>B) OLTS (insertion loss)</div>
+        <div>C) Visual inspection only</div>
+        <div>D) Continuity test only</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">5. How far can outdoor cable extend indoors per NEC?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) 25 feet</div>
+        <div>B) 50 feet</div>
+        <div>C) 100 feet</div>
+        <div>D) No limit</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">6. What is the TIA-568 maximum connector loss?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) 0.3 dB</div>
+        <div>B) 0.5 dB</div>
+        <div>C) 0.75 dB</div>
+        <div>D) 1.0 dB</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">7. What is the typical fusion splice loss?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) 0.05-0.1 dB</div>
+        <div>B) 0.3-0.5 dB</div>
+        <div>C) 0.75 dB</div>
+        <div>D) 1.0 dB</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">8. What must you call before excavating in the US?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) 911</div>
+        <div>B) 811</div>
+        <div>C) The customer</div>
+        <div>D) City hall</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">9. What is the #1 safety hazard in fiber optic work?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) Laser eye damage</div>
+        <div>B) Electrical shock</div>
+        <div>C) Fiber shards</div>
+        <div>D) Chemical burns</div>
+      </div>
+    </div>
+    
+    <div class="card no-break">
+      <p style="font-weight: 600;">10. What is the recommended minimum margin between power budget and loss budget?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+        <div>A) 1 dB</div>
+        <div>B) 3 dB</div>
+        <div>C) 6 dB</div>
+        <div>D) 10 dB</div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Answer Key -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  <h3 style="font-size: 1.5rem; font-weight: bold; color: #10b981; margin-bottom: 1.5rem;">✓ Answer Key</h3>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">1.</span><span><strong>C</strong> - 40× diameter under tension</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">2.</span><span><strong>B</strong> - Green = APC</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">3.</span><span><strong>D</strong> - 3.0 dB/km at 850nm</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">4.</span><span><strong>B</strong> - OLTS required</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">5.</span><span><strong>B</strong> - 50 feet max</span></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">6.</span><span><strong>C</strong> - 0.75 dB TIA max</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">7.</span><span><strong>A</strong> - 0.05-0.1 dB</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">8.</span><span><strong>B</strong> - 811 (utility locate)</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">9.</span><span><strong>C</strong> - Fiber shards</span></div>
+      <div style="display: flex; gap: 0.5rem;"><span style="font-weight: bold; width: 2rem;">10.</span><span><strong>B</strong> - 3 dB minimum</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CHEAT SHEET ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <h2 style="font-size: 1.875rem; font-weight: bold; color: #0f172a; margin-bottom: 1.5rem; border-bottom: 4px solid #4f46e5; padding-bottom: 0.5rem;">📋 Cheat Sheet - Critical Numbers</h2>
+  
+  <div class="card no-break" style="background: linear-gradient(135deg, #eef2ff 0%, white 100%); border: 2px solid #818cf8;">
+    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4f46e5; margin-bottom: 1rem; text-align: center;">🔢 Must-Know Values</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; font-size: 0.875rem;">
+      <div>
+        <p style="font-weight: bold; color: #3730a3; margin-bottom: 0.5rem;">Attenuation (dB/km)</p>
+        <div style="background: white; padding: 0.5rem; border-radius: 0.25rem;">
+          <p>MM @850nm: <strong>3.0</strong></p>
+          <p>MM @1300nm: <strong>1.0</strong></p>
+          <p>SM @1310nm: <strong>0.4</strong></p>
+          <p>SM @1550nm: <strong>0.25</strong></p>
+        </div>
+      </div>
+      <div>
+        <p style="font-weight: bold; color: #3730a3; margin-bottom: 0.5rem;">Connector/Splice Loss</p>
+        <div style="background: white; padding: 0.5rem; border-radius: 0.25rem;">
+          <p>TIA-568 max: <strong>0.75 dB</strong></p>
+          <p>Typical connector: <strong>0.3-0.5 dB</strong></p>
+          <p>Fusion splice: <strong>0.05-0.1 dB</strong></p>
+          <p>Mechanical splice: <strong>0.2-0.3 dB</strong></p>
+        </div>
+      </div>
+      <div>
+        <p style="font-weight: bold; color: #3730a3; margin-bottom: 0.5rem;">Bend Radius</p>
+        <div style="background: white; padding: 0.5rem; border-radius: 0.25rem;">
+          <p>Under tension: <strong>40× diameter</strong></p>
+          <p>Installed: <strong>20× diameter</strong></p>
+        </div>
+      </div>
+      <div>
+        <p style="font-weight: bold; color: #3730a3; margin-bottom: 0.5rem;">Key Limits</p>
+        <div style="background: white; padding: 0.5rem; border-radius: 0.25rem;">
+          <p>Outdoor indoors: <strong>50 feet</strong></p>
+          <p>Margin required: <strong>≥3 dB</strong></p>
+          <p>Splicer breakeven: <strong>~500 splices</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Formulas -->
+  <div class="card no-break" style="background: #ecfdf5; border: 2px solid #34d399; margin-top: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: bold; color: #10b981; margin-bottom: 1rem; text-align: center;">🧮 Essential Formulas</h3>
+    
+    <div style="display: flex; flex-direction: column; gap: 1rem; text-align: center; font-family: monospace;">
+      <div style="background: white; padding: 0.75rem; border-radius: 0.5rem;">
+        <p style="font-weight: bold;">Power Budget</p>
+        <p>= Tx Output (dBm) − Rx Sensitivity (dBm)</p>
+      </div>
+      <div style="background: white; padding: 0.75rem; border-radius: 0.5rem;">
+        <p style="font-weight: bold;">Loss Budget</p>
+        <p>= (Length × dB/km) + (Connectors × dB) + (Splices × dB)</p>
+      </div>
+      <div style="background: white; padding: 0.75rem; border-radius: 0.5rem;">
+        <p style="font-weight: bold; color: #047857;">Pass Condition</p>
+        <p>Power Budget > Loss Budget + 3 dB</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Color Codes Quick Ref -->
+  <div class="card no-break" style="margin-top: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4f46e5; margin-bottom: 1rem; text-align: center;">🎨 Color Code Quick Reference</h3>
+    
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; font-size: 0.875rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 9999px;"><div style="width: 1rem; height: 1rem; background: #fde68a; border-radius: 9999px; border: 1px solid #d97706;"></div> Beige = OM1</div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 9999px;"><div style="width: 1rem; height: 1rem; background: #1e293b; border-radius: 9999px; border: 1px solid #475569;"></div> Black = OM2</div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 9999px;"><div style="width: 1rem; height: 1rem; background: #22d3ee; border-radius: 9999px; border: 1px solid #0891b2;"></div> Aqua = OM3/4</div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 9999px;"><div style="width: 1rem; height: 1rem; background: #3b82f6; border-radius: 9999px; border: 1px solid #1d4ed8;"></div> Blue = SM PC</div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 9999px;"><div style="width: 1rem; height: 1rem; background: #22c55e; border-radius: 9999px; border: 1px solid #16a34a;"></div> Green = SM APC</div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 9999px;"><div style="width: 1rem; height: 1rem; background: #a3e635; border-radius: 9999px; border: 1px solid #84cc16;"></div> Lime = OM5</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FINAL PAGE ==================== -->
+<div class="page-break"></div>
+<div style="max-width: 56rem; margin: 0 auto; padding: 2rem;">
+  
+  <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 2rem; border-radius: 0.75rem; text-align: center;">
+    <h2 style="font-size: 1.875rem; font-weight: bold; margin-bottom: 1rem;">🎓 You're Ready!</h2>
+    <p style="font-size: 1.25rem; color: #a7f3d0; margin-bottom: 1.5rem;">You've completed the FOA Badge Mastery Course</p>
+    
+    <div style="background: rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 1.5rem; max-width: 28rem; margin: 0 auto;">
+      <p style="font-weight: 600; margin-bottom: 0.75rem;">Final Checklist Before Exam:</p>
+      <div style="text-align: left; font-size: 0.875rem; display: flex; flex-direction: column; gap: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="width: 1.25rem; height: 1.25rem; border: 2px solid white; border-radius: 0.25rem;"></span>
+          <span>Scored 90%+ on practice exam</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="width: 1.25rem; height: 1.25rem; border: 2px solid white; border-radius: 0.25rem;"></span>
+          <span>Can recite all attenuation values</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="width: 1.25rem; height: 1.25rem; border: 2px solid white; border-radius: 0.25rem;"></span>
+          <span>Know all connector color codes</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="width: 1.25rem; height: 1.25rem; border: 2px solid white; border-radius: 0.25rem;"></span>
+          <span>Can calculate power/loss budgets</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="width: 1.25rem; height: 1.25rem; border: 2px solid white; border-radius: 0.25rem;"></span>
+          <span>Understand OLTS vs OTDR roles</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="width: 1.25rem; height: 1.25rem; border: 2px solid white; border-radius: 0.25rem;"></span>
+          <span>Know safety hierarchy (#1 = shards)</span>
+        </div>
+      </div>
+    </div>
+    
+    <p style="margin-top: 2rem; color: #a7f3d0; font-size: 0.875rem;">
+      Built with precision for Noble Vanguard Cyber Defense<br>
+      FOA Badge Certification Study Guide v2.0
+    </p>
+  </div>
+  
+</div>
+
+</div> <!-- end app-shell wrapper -->
+
+<script>
+// ============ FOA Mastery App ============ //
+// Single-file, CDN-only, offline-ready. No external deps.
+(function() {
+  const stateKey = 'foaMasteryState_v1';
+  const version = 1;
+  const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+  const defaultState = () => ({
+    version,
+    completedSections: {},
+    cardStats: {},
+    quizAttempts: {
+      diagnostic: [],
+      moduleQuizzes: {},
+      examSimulator: []
+    },
+    lastLocation: null,
+    readinessScoreHistory: [],
+    settings: { printMode: false }
+  });
+
+  // ---------- Core storage ----------
+  let state = loadState();
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(stateKey);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      return parsed.version === version ? parsed : defaultState();
+    } catch {
+      return defaultState();
+    }
+  }
+  function saveState() {
+    localStorage.setItem(stateKey, JSON.stringify(state));
+    updateProgress();
+    updateReadiness();
+  }
+  function resetState() {
+    state = defaultState();
+    saveState();
+    location.reload();
+  }
+  function exportState() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'foa-mastery-progress.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  function importState(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file');
+        parsed.version = version;
+        state = parsed;
+        saveState();
+        location.reload();
+      } catch (err) {
+        alert('Import failed: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---------- Data sources derived from course facts ----------
+  const modules = [
+    { id: 'm1', title: 'Fiber Optics Fundamentals & Safety', tags: ['fundamentals','safety'] },
+    { id: 'm2', title: 'Transmission Systems & Components', tags: ['wavelengths','attenuation','transmission'] },
+    { id: 'm3', title: 'Optical Fiber Types & Properties', tags: ['om-grades','fiber-types','jacket-colors'] },
+    { id: 'm4', title: 'Connectors, Termination & Splicing', tags: ['connectors','apc-vs-upc','splicing'] },
+    { id: 'm5', title: 'Fiber Optic Testing', tags: ['olts','otdr','testing'] },
+    { id: 'm6', title: 'Cable Types & Installation', tags: ['cabling','nec-ratings','bend-radius'] },
+  ];
+
+  const flashcards = [
+    { id: 'fc-wavelength-1550', module: 'm2', prompt: 'Lowest loss wavelength used for long-haul?', answer: '1550 nm ~0.25 dB/km singlemode', tags: ['wavelengths','attenuation'], sourceSectionId: 'm2' },
+    { id: 'fc-wavelength-850', module: 'm2', prompt: 'Typical multimode loss at 850 nm?', answer: '≈3.0 dB/km', tags: ['wavelengths','attenuation'], sourceSectionId: 'm2' },
+    { id: 'fc-om-colors', module: 'm3', prompt: 'OM jacket color codes?', answer: 'OM1 beige, OM2 black, OM3/4 aqua, OM5 lime', tags: ['om-grades','jacket-colors'], sourceSectionId: 'm3' },
+    { id: 'fc-connector-colors', module: 'm4', prompt: 'Connector color: APC vs UPC?', answer: 'Green = APC, Blue = UPC/PC', tags: ['connectors','apc-vs-upc'], sourceSectionId: 'm4' },
+    { id: 'fc-bend-radius', module: 'm6', prompt: 'Bend radius under tension vs installed?', answer: 'Under tension 40× diameter; installed 20×', tags: ['bend-radius'], sourceSectionId: 'm6' },
+    { id: 'fc-olts-cert', module: 'm5', prompt: 'Tool required for certification/tier testing?', answer: 'OLTS is required; OTDR is supplemental/troubleshooting', tags: ['olts','testing'], sourceSectionId: 'm5' },
+    { id: 'fc-otdr-role', module: 'm5', prompt: 'OTDR primary role?', answer: 'Troubleshoot/characterize events, not Tier 1 certification', tags: ['otdr','testing'], sourceSectionId: 'm5' },
+    { id: 'fc-nec-outdoor', module: 'm6', prompt: 'Outdoor-rated cable indoor limit before transition?', answer: '50 feet indoors unless fire-rated (NEC)', tags: ['nec-ratings','cabling'], sourceSectionId: 'm6' },
+    { id: 'fc-loss-budget', module: 'm2', prompt: 'Margin required for pass condition?', answer: '≥3 dB margin beyond loss budget', tags: ['testing','loss-budget'], sourceSectionId: 'm2' },
+    { id: 'fc-connector-loss', module: 'm4', prompt: 'TIA-568 max connector loss?', answer: '0.75 dB (typical 0.3–0.5 dB)', tags: ['connectors'], sourceSectionId: 'm4' },
+  ];
+
+  const diagnosticQuestions = [
+    { q: 'What is typical SM loss at 1550 nm?', options: ['3.0 dB/km','1.0 dB/km','0.25 dB/km','0.75 dB/km'], answer: 2, tags: ['wavelengths','attenuation'] },
+    { q: 'APC connector housing color?', options: ['Blue','Green','Beige','Black'], answer: 1, tags: ['connectors','apc-vs-upc'] },
+    { q: 'Bend radius under tension?', options: ['10×','20×','30×','40×'], answer: 3, tags: ['bend-radius'] },
+    { q: 'Tool required for certification (Tier 1)?', options: ['OTDR','Visual fault locator','OLTS','Fusion splicer'], answer: 2, tags: ['olts','testing'] },
+    { q: 'OM5 jacket color?', options: ['Aqua','Lime','Beige','Blue'], answer: 1, tags: ['om-grades','jacket-colors'] },
+    { q: 'Outdoor cable indoor run limit before transition?', options: ['10 ft','25 ft','50 ft','100 ft'], answer: 2, tags: ['nec-ratings','cabling'] },
+    { q: 'Fusion splice typical loss?', options: ['0.05–0.1 dB','0.3–0.5 dB','0.75 dB','1.0 dB'], answer: 0, tags: ['splicing'] },
+    { q: 'Multimode typical loss at 850 nm?', options: ['0.25 dB/km','1.0 dB/km','3.0 dB/km','0.4 dB/km'], answer: 2, tags: ['wavelengths','attenuation'] },
+    { q: 'Power budget formula?', options: ['Tx + Rx','Tx – Rx sensitivity','Rx – Tx','Length × loss'], answer: 1, tags: ['loss-budget'] },
+    { q: 'Primary OTDR role?', options: ['Tier 1 cert','Troubleshoot/characterize events','Splice insertion','Visual ID'], answer: 1, tags: ['otdr','testing'] },
+    { q: 'Margin required for pass?', options: ['0 dB','1 dB','3 dB','5 dB'], answer: 2, tags: ['testing'] },
+    { q: 'Connector color for UPC?', options: ['Blue','Green','Lime','Aqua'], answer: 0, tags: ['connectors','apc-vs-upc'] },
+  ];
+
+  const moduleQuizzes = {
+    m1: [
+      { q:'Biggest safety hazard in fiber work?', options:['High-power lasers','Fiber shards','Chemicals','Noise'], answer:1, tags:['safety'] },
+      { q:'Fiber operates at which OSI layer?', options:['Layer 2','Layer 1','Layer 3','Layer 4'], answer:1, tags:['fundamentals'] },
+    ],
+    m2: [
+      { q:'Lowest loss wavelength?', options:['850 nm','1310 nm','1550 nm','1625 nm'], answer:2, tags:['wavelengths','attenuation'] },
+      { q:'Typical multimode loss @850 nm?', options:['0.25 dB/km','1.0 dB/km','3.0 dB/km','0.75 dB/km'], answer:2, tags:['attenuation'] },
+    ],
+    m3: [
+      { q:'OM1 jacket color?', options:['Beige','Black','Aqua','Lime'], answer:0, tags:['om-grades','jacket-colors'] },
+      { q:'OM5 jacket color?', options:['Aqua','Lime','Blue','Green'], answer:1, tags:['om-grades','jacket-colors'] },
+    ],
+    m4: [
+      { q:'APC connector color?', options:['Blue','Green','Aqua','Black'], answer:1, tags:['connectors','apc-vs-upc'] },
+      { q:'Fusion splice loss?', options:['0.05–0.1 dB','0.3–0.5 dB','0.75 dB','>1.0 dB'], answer:0, tags:['splicing'] },
+    ],
+    m5: [
+      { q:'Tier 1 certification tool?', options:['OTDR','OLTS','VFL','Microscope'], answer:1, tags:['olts','testing'] },
+      { q:'OTDR primary purpose?', options:['Certify Tier 1','Troubleshoot & characterize','Clean connectors','Set bend radius'], answer:1, tags:['otdr','testing'] },
+    ],
+    m6: [
+      { q:'Bend radius under tension?', options:['10×','20×','30×','40×'], answer:3, tags:['bend-radius'] },
+      { q:'Outdoor cable indoor limit?', options:['10 ft','25 ft','50 ft','100 ft'], answer:2, tags:['nec-ratings','cabling'] },
+    ]
+  };
+
+  // Build 25 exam questions from combined pools (reusing facts)
+  const examQuestions = (() => {
+    const pool = [
+      ...diagnosticQuestions,
+      ...moduleQuizzes.m1,
+      ...moduleQuizzes.m2,
+      ...moduleQuizzes.m3,
+      ...moduleQuizzes.m4,
+      ...moduleQuizzes.m5,
+      ...moduleQuizzes.m6,
+      { q:'TIA max connector loss?', options:['0.75 dB','1.0 dB','0.3 dB','0.1 dB'], answer:0, tags:['connectors'] },
+      { q:'Typical mechanical splice loss?', options:['0.05 dB','0.1 dB','0.2–0.3 dB','0.75 dB'], answer:2, tags:['splicing'] },
+      { q:'Required margin for pass?', options:['1 dB','2 dB','3 dB','5 dB'], answer:2, tags:['testing'] },
+      { q:'Which has lowest attenuation?', options:['850 nm MM','1310 nm MM','1310 nm SM','1550 nm SM'], answer:3, tags:['attenuation'] },
+      { q:'Outdoor to indoor run limit?', options:['10 ft','25 ft','50 ft','75 ft'], answer:2, tags:['nec-ratings'] },
+      { q:'Color for SM PC/UPC?', options:['Green','Blue','Aqua','Lime'], answer:1, tags:['connectors'] },
+      { q:'Role of OLTS?', options:['Event location','Tier 1 certification','Fusion splicing','Color ID'], answer:1, tags:['olts'] },
+      { q:'OM3/4 jacket color?', options:['Beige','Aqua','Lime','Black'], answer:1, tags:['om-grades'] },
+      { q:'Bend radius installed?', options:['10×','20×','30×','40×'], answer:1, tags:['bend-radius'] },
+      { q:'Typical loss @1310 nm SM?', options:['3.0 dB/km','1.0 dB/km','0.4 dB/km','0.25 dB/km'], answer:2, tags:['attenuation'] },
+      { q:'Which tool for troubleshooting reflectance events?', options:['OLTS','OTDR','Microscope','Launch cable'], answer:1, tags:['otdr'] },
+      { q:'Fusion splice breakeven ~?', options:['50 splices','200 splices','500 splices','1000 splices'], answer:2, tags:['splicing'] },
+      { q:'Power budget formula uses?', options:['Tx + Rx','Tx - Rx sensitivity','Length x loss','Rx - Tx'], answer:1, tags:['loss-budget'] },
+      { q:'Margin default recommended?', options:['1 dB','3 dB','6 dB','0 dB'], answer:1, tags:['testing'] },
+    ];
+    // Ensure 25 questions; if more, slice; if fewer, reuse.
+    const out = [];
+    while (out.length < 25) out.push(pool[out.length % pool.length]);
+    return out.slice(0,25);
+  })();
+
+  // ---------- DOM helpers ----------
+  const qs = sel => document.querySelector(sel);
+  const qsa = sel => Array.from(document.querySelectorAll(sel));
+
+  // Assign IDs/data attributes to modules & key sections
+  function mapModules() {
+    modules.forEach((m, idx) => {
+      const heading = qsa('h2').find(h => h.textContent.includes(m.title));
+      if (heading) {
+        const sectionContainer = heading.closest('div')?.parentElement || heading.parentElement;
+        sectionContainer?.setAttribute('data-module', String(idx+1));
+        sectionContainer?.setAttribute('data-module-title', m.title);
+        sectionContainer?.setAttribute('id', m.id);
+      }
+    });
+    const practiceExam = qsa('h2,h3').find(h => h.textContent.toLowerCase().includes('practice exam') || h.textContent.toLowerCase().includes('exam readiness'));
+    if (practiceExam) practiceExam.setAttribute('id','practice-exam');
+    const cheat = qsa('h2').find(h => h.textContent.toLowerCase().includes('cheat sheet'));
+    if (cheat) cheat.setAttribute('id','cheat-sheet');
+    const glossary = qsa('h2').find(h => h.textContent.toLowerCase().includes('glossary'));
+    if (glossary) glossary.setAttribute('id','glossary');
+  }
+
+  // ---------- Navigation ----------
+  function buildNav() {
+    const navLinks = qs('#nav-links');
+    navLinks.innerHTML = '';
+    const addLink = (href, label) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.textContent = label;
+      navLinks.appendChild(a);
+    };
+    addLink('#readiness-zone-heading','Readiness Zone');
+    modules.forEach(m => addLink('#'+m.id, m.title));
+    addLink('#practice-exam','Practice Exam');
+    addLink('#cheat-sheet','Cheat Sheet');
+    addLink('#glossary','Glossary');
+  }
+
+  function initScrollSpy() {
+    const links = qsa('#nav-links a');
+    const targets = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = '#' + entry.target.id;
+          links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === id));
+        }
+      });
+    }, { rootMargin: '-40% 0px -50% 0px', threshold: [0,0.25,0.5,1] });
+    targets.forEach(t => observer.observe(t));
+  }
+
+  // ---------- Progress & readiness ----------
+  function updateProgress() {
+    const total = modules.length;
+    const completed = Object.keys(state.completedSections).length;
+    const pct = Math.round((completed/total)*100);
+    const bar = qs('#progress-bar');
+    if (bar) bar.style.width = pct + '%';
+  }
+
+  function computeReadiness() {
+    const latestDiag = state.quizAttempts.diagnostic.slice(-1)[0];
+    const diagScore = latestDiag?.scorePct ?? 0;
+    const examBest = Math.max(0, ...state.quizAttempts.examSimulator.map(a => a.scorePct || 0));
+    const moduleBest = modules.map(m => {
+      const arr = state.quizAttempts.moduleQuizzes[m.id] || [];
+      return arr.length ? Math.max(...arr.map(r => r.scorePct || 0)) : 0;
+    });
+    const moduleScore = moduleBest.length ? moduleBest.reduce((a,b)=>a+b,0)/moduleBest.length : 0;
+    const cardMastery = computeFlashcardMastery();
+
+    const readiness = Math.round(
+      diagScore * 0.3 +
+      cardMastery * 0.3 +
+      moduleScore * 0.2 +
+      examBest * 0.2
+    );
+    const breakdown = { diagnostic: diagScore, flashcards: cardMastery, moduleQuizzes: moduleScore, examBest };
+    return { readiness, breakdown };
+  }
+
+  function computeFlashcardMastery() {
+    const now = Date.now();
+    const stats = flashcards.map(c => state.cardStats[c.id]).filter(Boolean);
+    if (!stats.length) return 0;
+    const strong = stats.filter(s => s.reps >= 2 && new Date(s.dueDateISO).getTime() > now).length;
+    return Math.round((strong / stats.length) * 100);
+  }
+
+  function updateReadiness() {
+    const pill = qs('#readiness-pill');
+    const { readiness, breakdown } = computeReadiness();
+    const label =
+      readiness < 40 ? 'Not Ready' :
+      readiness < 70 ? 'Getting There' :
+      readiness < 85 ? 'Test-Ready' : 'Mastery';
+    if (pill) pill.textContent = `${readiness}% · ${label}`;
+    qs('#due-count').textContent = countDueCards();
+    qs('#exam-best').textContent = `${Math.max(0, ...state.quizAttempts.examSimulator.map(a=>a.scorePct||0))}%`;
+    const lastExam = state.quizAttempts.examSimulator.slice(-1)[0];
+    qs('#exam-last').textContent = lastExam ? `Last: ${lastExam.scorePct}% (${new Date(lastExam.dateISO).toLocaleString()})` : 'No attempts yet';
+    qs('#diagnostic-status').textContent = state.quizAttempts.diagnostic.length
+      ? `Latest: ${state.quizAttempts.diagnostic.slice(-1)[0].scorePct}%`
+      : 'Not started';
+    qs('#next-action').textContent = nextActionText();
+  }
+
+  function nextActionText() {
+    const due = countDueCards();
+    if (due > 0) return `Review ${due} due cards to solidify weak areas.`;
+    const latestDiag = state.quizAttempts.diagnostic.slice(-1)[0];
+    if (!latestDiag) return 'Run the diagnostic to map your weak tags.';
+    const bestExam = Math.max(0, ...state.quizAttempts.examSimulator.map(a=>a.scorePct||0));
+    if (bestExam < 70) return 'Run a timed exam simulator to raise best score above 70%.';
+    return 'Polish weak tags via module quizzes and flashcards.';
+  }
+
+  // ---------- Continue banner ----------
+  function initContinueBanner() {
+    const banner = qs('#continue-banner');
+    if (!state.lastLocation) return;
+    banner.style.display = 'block';
+    qs('#continue-btn').onclick = () => {
+      const target = document.getElementById(state.lastLocation.sectionId);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      window.scrollTo(0, state.lastLocation.scrollY || 0);
+      banner.style.display = 'none';
+    };
+    qs('#dismiss-continue').onclick = () => {
+      state.lastLocation = null;
+      banner.style.display = 'none';
+      saveState();
+    };
+  }
+
+  // Save scroll position on navigation click
+  function bindNavClicks() {
+    qs('#nav-links').addEventListener('click', e => {
+      if (e.target.tagName === 'A') {
+        const href = e.target.getAttribute('href');
+        const sectionId = href?.replace('#','');
+        state.lastLocation = { sectionId, scrollY: window.scrollY, timestampISO: new Date().toISOString() };
+        saveState();
+      }
+    });
+  }
+
+  // ---------- Flashcards & SM-2 ----------
+  function ensureCardStats(cardId) {
+    if (!state.cardStats[cardId]) {
+      state.cardStats[cardId] = {
+        ease: 2.5,
+        intervalDays: 0,
+        reps: 0,
+        lapses: 0,
+        dueDateISO: new Date().toISOString(),
+        lastReviewedISO: null
+      };
+    }
+    return state.cardStats[cardId];
+  }
+
+  function scheduleCard(cardId, rating) {
+    const s = ensureCardStats(cardId);
+    const quality = rating;
+    if (quality < 3) {
+      s.reps = 0;
+      s.intervalDays = 1;
+      s.lapses += 1;
+    } else {
+      s.reps += 1;
+      if (s.reps === 1) s.intervalDays = 1;
+      else if (s.reps === 2) s.intervalDays = 6;
+      else s.intervalDays = Math.round(s.intervalDays * s.ease);
+      s.ease = clamp(s.ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)), 1.3, 2.7);
+    }
+    const due = new Date();
+    due.setDate(due.getDate() + s.intervalDays);
+    s.dueDateISO = due.toISOString();
+    s.lastReviewedISO = new Date().toISOString();
+    saveState();
+  }
+
+  function countDueCards() {
+    const now = Date.now();
+    return flashcards.filter(c => {
+      const st = ensureCardStats(c.id);
+      return new Date(st.dueDateISO).getTime() <= now;
+    }).length;
+  }
+
+  // Render recall sections into each module
+  function renderRecall() {
+    flashcards.forEach(card => ensureCardStats(card.id));
+    modules.forEach(m => {
+      const modEl = document.getElementById(m.id);
+      if (!modEl) return;
+      const recall = document.createElement('div');
+      recall.className = 'card no-break';
+      recall.innerHTML = `
+        <h3 style="font-size: 1.125rem; font-weight: bold; color: #0f172a; margin-bottom: 0.75rem;">Recall & Spaced Repetition</h3>
+        <div class="space-y-3" id="recall-${m.id}"></div>
+      `;
+      modEl.appendChild(recall);
+      const container = recall.querySelector(`#recall-${m.id}`);
+      flashcards.filter(c => c.module === m.id).forEach(card => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'p-3 rounded border bg-white';
+        const st = state.cardStats[card.id];
+        cardDiv.innerHTML = `
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <p class="font-semibold text-slate-800">${card.prompt}</p>
+              <p class="flashcard-answer text-sm text-slate-600 mt-2" style="display:none;">${card.answer}</p>
+            </div>
+            <button class="btn btn-secondary reveal-btn" type="button">Reveal</button>
+          </div>
+          <div class="flex gap-2 mt-2 rating-row" style="display:none;">
+            ${[1,2,3,4,5].map(r=>`<button class="btn btn-secondary rating-btn" data-rating="${r}" type="button">${r}</button>`).join('')}
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Ease: ${st.ease.toFixed(2)} · Reps: ${st.reps} · Due: ${new Date(st.dueDateISO).toLocaleDateString()}</p>
+        `;
+        container.appendChild(cardDiv);
+        const answer = cardDiv.querySelector('.flashcard-answer');
+        const reveal = cardDiv.querySelector('.reveal-btn');
+        const ratingRow = cardDiv.querySelector('.rating-row');
+        reveal.onclick = () => {
+          answer.style.display = 'block';
+          ratingRow.style.display = 'flex';
+          reveal.setAttribute('aria-expanded', 'true');
+        };
+        ratingRow.querySelectorAll('.rating-btn').forEach(btn => {
+          btn.onclick = () => {
+            const rating = Number(btn.dataset.rating);
+            scheduleCard(card.id, rating);
+            cardDiv.style.borderColor = '#22c55e';
+            cardDiv.style.background = '#f0fdf4';
+            updateReadiness();
+          };
+        });
+      });
+    });
+  }
+
+  // ---------- Review session ----------
+  function startReviewSession() {
+    const due = flashcards.filter(c => {
+      const st = ensureCardStats(c.id);
+      return new Date(st.dueDateISO).getTime() <= Date.now();
+    });
+    if (!due.length) {
+      alert('No due cards. Great job!');
+      return;
+    }
+    let idx = 0;
+    const container = document.createElement('div');
+    container.className = 'section-card';
+    container.innerHTML = `
+      <h3 class="text-lg font-semibold">Review Session</h3>
+      <div id="review-card" class="mt-2"></div>
+      <div class="flex gap-2 mt-3">
+        ${[1,2,3,4,5].map(r=>`<button class="btn btn-secondary" data-rating="${r}" type="button">${r}</button>`).join('')}
+      </div>
+      <p class="text-sm text-slate-600 mt-2" id="review-progress"></p>
+    `;
+    const readinessZone = document.querySelector('#readiness-zone-heading')?.parentElement?.parentElement;
+    readinessZone?.appendChild(container);
+
+    function renderCard() {
+      const card = due[idx];
+      qs('#review-card').innerHTML = `
+        <p class="font-semibold">${card.prompt}</p>
+        <p class="text-sm text-slate-600 mt-2">${card.answer}</p>
+      `;
+      qs('#review-progress').textContent = `Card ${idx+1} of ${due.length}`;
+    }
+    renderCard();
+    container.querySelectorAll('[data-rating]').forEach(btn => {
+      btn.onclick = () => {
+        scheduleCard(due[idx].id, Number(btn.dataset.rating));
+        idx += 1;
+        if (idx >= due.length) {
+          container.querySelector('#review-card').innerHTML = '<p class="font-semibold text-emerald-600">Session complete!</p>';
+          updateReadiness();
+        } else {
+          renderCard();
+        }
+      };
+    });
+  }
+
+  // ---------- Diagnostic ----------
+  function runDiagnostic() {
+    let score = 0;
+    diagnosticQuestions.forEach(q => {
+      const choice = prompt(`${q.q}\n${q.options.map((o,i)=>`${i+1}. ${o}`).join('\n')}`) || '';
+      const idx = Number(choice) - 1;
+      if (idx === q.answer) score += 1;
+    });
+    const scorePct = Math.round((score / diagnosticQuestions.length) * 100);
+    const weakTags = deriveWeakTags(diagnosticQuestions, scorePct);
+    state.quizAttempts.diagnostic.push({ dateISO: new Date().toISOString(), scorePct, byTag: {}, weakTags });
+    saveState();
+    alert(`Diagnostic complete: ${scorePct}%`);
+  }
+
+  function deriveWeakTags(questions, scorePct) {
+    // Simple heuristic: return tags if score below 80
+    if (scorePct >= 80) return [];
+    const tagCounts = {};
+    questions.forEach(q => q.tags.forEach(t => tagCounts[t] = (tagCounts[t] || 0) + 1));
+    return Object.keys(tagCounts).slice(0,3);
+  }
+
+  // ---------- Module quizzes ----------
+  function renderModuleQuizzes() {
+    Object.entries(moduleQuizzes).forEach(([modId, questions]) => {
+      const modEl = document.getElementById(modId);
+      if (!modEl) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'card no-break';
+      wrap.innerHTML = `<h3 style="font-size: 1.125rem; font-weight: bold; margin-bottom: 0.5rem;">Module Quiz</h3>
+      <div class="space-y-3" id="quiz-${modId}"></div>
+      <button class="btn btn-secondary mt-2" type="button">Submit Quiz</button>
+      <div class="text-sm text-slate-700 mt-2" id="quiz-result-${modId}"></div>`;
+      modEl.appendChild(wrap);
+      const container = wrap.querySelector(`#quiz-${modId}`);
+      questions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'p-3 border rounded';
+        card.innerHTML = `<p class="font-semibold">${idx+1}. ${q.q}</p>
+          <div class="flex flex-col gap-1 mt-2">
+            ${q.options.map((opt,i)=>`
+              <label class="flex gap-2 items-center text-sm">
+                <input type="radio" name="q-${modId}-${idx}" value="${i}">
+                <span>${opt}</span>
+              </label>`).join('')}
+          </div>`;
+        container.appendChild(card);
+      });
+      wrap.querySelector('button').onclick = () => {
+        let correct = 0;
+        questions.forEach((q, idx) => {
+          const chosen = wrap.querySelector(`input[name="q-${modId}-${idx}"]:checked`);
+          if (chosen && Number(chosen.value) === q.answer) correct += 1;
+        });
+        const scorePct = Math.round((correct / questions.length) * 100);
+        state.quizAttempts.moduleQuizzes[modId] = state.quizAttempts.moduleQuizzes[modId] || [];
+        state.quizAttempts.moduleQuizzes[modId].push({ dateISO: new Date().toISOString(), scorePct, wrongByTag: {} });
+        wrap.querySelector(`#quiz-result-${modId}`).textContent = `Score: ${scorePct}%`;
+        saveState();
+      };
+    });
+  }
+
+  // ---------- Exam simulator ----------
+  function startExamSimulator() {
+    const shuffled = [...examQuestions].sort(() => Math.random() - 0.5);
+    let correct = 0;
+    const start = Date.now();
+    shuffled.forEach((q, idx) => {
+      const choice = prompt(`Q${idx+1}/${shuffled.length}: ${q.q}\n${q.options.map((o,i)=>`${i+1}. ${o}`).join('\n')}`) || '';
+      if (Number(choice)-1 === q.answer) correct += 1;
+    });
+    const durationSec = Math.round((Date.now() - start)/1000);
+    const scorePct = Math.round((correct / shuffled.length) * 100);
+    state.quizAttempts.examSimulator.push({
+      dateISO: new Date().toISOString(),
+      scorePct,
+      durationSec,
+      wrongByTag: {},
+      flaggedCount: 0,
+      bestScorePctSnapshot: Math.max(scorePct, Math.max(0,...state.quizAttempts.examSimulator.map(a=>a.scorePct||0)))
+    });
+    saveState();
+    alert(`Exam complete: ${scorePct}% in ${durationSec}s`);
+  }
+
+  // ---------- Tools / calculators ----------
+  function initCalculator() {
+    const inputs = ['tx','rx','length','fiber','conn-count','conn-loss','splice-count','splice-loss','margin']
+      .reduce((acc,id)=>{ acc[id]=qs(`#calc-${id}`); return acc; },{});
+    const output = qs('#calc-output');
+    function compute() {
+      const Tx = Number(inputs['tx'].value)||0;
+      const Rx = Number(inputs['rx'].value)||0;
+      const length = Number(inputs['length'].value)||0;
+      const fiberLoss = Number(inputs['fiber'].value)||0;
+      const connCount = Number(inputs['conn-count'].value)||0;
+      const connLoss = Number(inputs['conn-loss'].value)||0;
+      const spliceCount = Number(inputs['splice-count'].value)||0;
+      const spliceLoss = Number(inputs['splice-loss'].value)||0;
+      const margin = Number(inputs['margin'].value)||0;
+      const powerBudget = Tx - Rx;
+      const totalLinkLoss = length*fiberLoss + connCount*connLoss + spliceCount*spliceLoss;
+      const allowedLoss = powerBudget - margin;
+      const pass = totalLinkLoss <= allowedLoss;
+      const remaining = allowedLoss - totalLinkLoss;
+      const estRx = Tx - totalLinkLoss;
+      const reqRxWithMargin = Rx + margin;
+      output.innerHTML = `
+        <div>Power budget: <strong>${powerBudget.toFixed(2)} dB</strong></div>
+        <div>Total link loss: <strong>${totalLinkLoss.toFixed(2)} dB</strong></div>
+        <div>Allowed loss (budget - margin): <strong>${allowedLoss.toFixed(2)} dB</strong></div>
+        <div>Pass/Fail: <strong style="color:${pass?'#16a34a':'#dc2626'}">${pass?'PASS':'FAIL'}</strong></div>
+        <div>Remaining margin: <strong>${remaining.toFixed(2)} dB</strong></div>
+        <div>Estimated Rx power: <strong>${estRx.toFixed(2)} dBm</strong></div>
+        <div>Required Rx minimum w/ margin: <strong>${reqRxWithMargin.toFixed(2)} dBm</strong></div>
+      `;
+    }
+    Object.values(inputs).forEach(inp => inp?.addEventListener('input', compute));
+    compute();
+  }
+
+  // Connector color trainer
+  const colorPairs = [
+    { color:'Green', meaning:'APC (angled) singlemode' },
+    { color:'Blue', meaning:'UPC/PC singlemode' },
+    { color:'Beige', meaning:'OM1' },
+    { color:'Black', meaning:'OM2' },
+    { color:'Aqua', meaning:'OM3/OM4' },
+    { color:'Lime', meaning:'OM5' },
+  ];
+  function nextColorDrill() {
+    const mode = Math.random()>0.5 ? 'color' : 'meaning';
+    const item = colorPairs[Math.floor(Math.random()*colorPairs.length)];
+    const el = qs('#color-trainer');
+    if (mode === 'color') {
+      el.innerHTML = `Color swatch: <span class="pill" style="background:${item.color.toLowerCase()}; color:black;">${item.color}</span><br>Meaning?`;
+    } else {
+      el.innerHTML = `Meaning: <strong>${item.meaning}</strong><br>Pick color?`;
+    }
+  }
+
+  // Trap trainer
+  const traps = [
+    { scenario:'Customer needs Tier 1 certification per standards', answer:'OLTS', why:'OTDR is optional; OLTS required for certification.' },
+    { scenario:'Need to locate a high-loss event mid-span', answer:'OTDR', why:'OTDR finds event location and reflectance.' },
+    { scenario:'Document end-to-end insertion loss', answer:'OLTS', why:'OTDR event loss ≠ end-to-end certification value.' },
+  ];
+  function renderTrap() {
+    const t = traps[Math.floor(Math.random()*traps.length)];
+    qs('#trap-trainer').innerHTML = `<p>${t.scenario}</p><p class="text-xs text-slate-600">Choose OLTS or OTDR.</p>`;
+    qs('#trap-trainer').dataset.answer = t.answer;
+    qs('#trap-trainer').dataset.why = t.why;
+  }
+  qsa('[data-choice]').forEach(btn => btn.onclick = () => {
+    const ans = qs('#trap-trainer').dataset.answer;
+    const why = qs('#trap-trainer').dataset.why;
+    const choice = btn.dataset.choice;
+    alert(`${choice === ans ? 'Correct' : 'Incorrect'}: ${why}`);
+  });
+
+  // Bend radius drill
+  const bendPrompts = [
+    { prompt:'Cable under tension', answer:'40x' },
+    { prompt:'Cable installed/resting', answer:'20x' },
+  ];
+  function renderBend() {
+    const b = bendPrompts[Math.floor(Math.random()*bendPrompts.length)];
+    qs('#bend-drill').innerHTML = `<p>${b.prompt}: 40× or 20×?</p>`;
+    qs('#bend-drill').dataset.answer = b.answer;
+  }
+  qsa('[data-bend]').forEach(btn => btn.onclick = () => {
+    const ans = qs('#bend-drill').dataset.answer;
+    alert(btn.dataset.bend.toLowerCase() === ans ? 'Correct' : `Incorrect: Should be ${ans}`);
+  });
+
+  // ---------- Print mode ----------
+  function togglePrintMode() {
+    state.settings.printMode = !state.settings.printMode;
+    document.body.classList.toggle('print-mode', state.settings.printMode);
+    saveState();
+  }
+
+  // ---------- Mobile nav ----------
+  function initMobileNav() {
+    const btn = qs('#mobile-nav-toggle');
+    const sidebar = qs('#sidebar');
+    const backdrop = qs('#drawer-backdrop');
+    const close = () => {
+      sidebar.classList.add('mobile-hidden');
+      backdrop.classList.remove('show');
+      btn.setAttribute('aria-expanded','false');
+    };
+    btn.onclick = () => {
+      const hidden = sidebar.classList.contains('mobile-hidden');
+      sidebar.classList.toggle('mobile-hidden');
+      backdrop.classList.toggle('show', hidden);
+      btn.setAttribute('aria-expanded', hidden ? 'true' : 'false');
+    };
+    backdrop.onclick = close;
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') close();
+    });
+  }
+
+  // ---------- Init ----------
+  function init() {
+    applyTypographyClasses();
+    mapModules();
+    buildNav();
+    initScrollSpy();
+    bindNavClicks();
+    initContinueBanner();
+    renderRecall();
+    renderModuleQuizzes();
+    initCalculator();
+    nextColorDrill();
+    renderTrap();
+    renderBend();
+    updateProgress();
+    updateReadiness();
+    initMobileNav();
+
+    // Buttons
+    qs('#review-now')?.addEventListener('click', startReviewSession);
+    qs('#start-review')?.addEventListener('click', startReviewSession);
+    qs('#start-diagnostic')?.addEventListener('click', runDiagnostic);
+    qs('#diagnostic-start-cta')?.addEventListener('click', runDiagnostic);
+    qs('#start-exam')?.addEventListener('click', startExamSimulator);
+    qs('#next-color-drill')?.addEventListener('click', nextColorDrill);
+    qs('#trap-trainer')?.addEventListener('click', renderTrap);
+    qs('#bend-drill')?.addEventListener('click', renderBend);
+    qs('#reset-progress')?.addEventListener('click', () => { if (confirm('Reset all progress?')) resetState(); });
+    qs('#export-progress')?.addEventListener('click', exportState);
+    qs('#import-progress')?.addEventListener('change', e => {
+      if (e.target.files?.[0]) importState(e.target.files[0]);
+    });
+    qs('#print-toggle')?.addEventListener('click', togglePrintMode);
+    // Restore print toggle state
+    document.body.classList.toggle('print-mode', state.settings.printMode);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  // Apply manual Tailwind utility classes to headings/paragraphs/lists if they
+  // don't already carry classes (keeps original inline styles intact).
+  function applyTypographyClasses() {
+    const assign = (selector, classes) => {
+      qsa(selector).forEach(el => {
+        if (!el.className) classes.split(' ').forEach(c => el.classList.add(c));
+      });
+    };
+    assign('h1', 'text-3xl font-bold mb-4');
+    assign('h2', 'text-2xl font-semibold mt-6 mb-3');
+    assign('h3', 'text-xl font-semibold mt-4 mb-2');
+    assign('p', 'mb-4');
+    assign('ul', 'list-disc pl-6 mb-4');
+  }
+})();
+</script>
+</body>
+</html>
