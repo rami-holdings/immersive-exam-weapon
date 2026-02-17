@@ -322,6 +322,11 @@
           <button id="start-exam" class="btn btn-secondary" type="button">Exam Simulator</button>
         </div>
       </div>
+      <div id="passProbabilityCard" class="bg-white shadow rounded-xl p-6 mt-6">
+        <h3 class="text-lg font-semibold mb-2">Estimated Pass Probability</h3>
+        <div id="passProbabilityValue" class="text-4xl font-bold"></div>
+        <div id="passProbabilityLabel" class="text-sm mt-1"></div>
+      </div>
       <div class="interactive-grid mt-4">
         <div class="section-card">
           <h3 class="text-lg font-semibold">Due Cards</h3>
@@ -1449,6 +1454,94 @@
     reader.readAsText(file);
   }
 
+  // ================================
+  // PASS PROBABILITY ENGINE
+  // ================================
+  function calculatePassProbability(state) {
+    const attempts = state.quizAttempts?.examSimulator || [];
+    const bestExam = attempts.length
+      ? Math.max(...attempts.map(a => a.scorePct))
+      : 0;
+
+    const diagnostic = state.quizAttempts?.diagnostic?.[0]?.scorePct || 0;
+
+    const domainValues = Object.values(state.domainScores || {});
+    const domainAverage = domainValues.length
+      ? domainValues.reduce((a, b) => a + b, 0) / domainValues.length
+      : 0;
+
+    const weakestDomain = domainValues.length
+      ? Math.min(...domainValues)
+      : 0;
+
+    const domainStability = (domainAverage + weakestDomain) / 2;
+
+    const cardStats = state.cardStats || {};
+    const totalCards = Object.keys(cardStats).length || 1;
+    const stableCards = Object.values(cardStats).filter(
+      c => c.reps >= 2 && c.ease >= 2.3
+    ).length;
+
+    const retentionRatio = stableCards / totalCards;
+
+    const improvement = bestExam - diagnostic;
+    const improvementFactor = Math.max(0, Math.min(improvement / 50, 1));
+
+    const latestAttempt = attempts.length ? attempts[attempts.length - 1] : null;
+    const calibrationPenalty = latestAttempt
+      ? (latestAttempt.highConfidenceErrors || 0) /
+        (latestAttempt.totalQuestions || 1)
+      : 0;
+
+    const calibrationFactor = 1 - calibrationPenalty;
+
+    let weighted =
+      0.35 * (bestExam / 100) +
+      0.20 * (domainStability / 100) +
+      0.20 * retentionRatio +
+      0.10 * improvementFactor +
+      0.15 * calibrationFactor;
+
+    let passProbability = weighted * 100;
+
+    if (weakestDomain < 50) {
+      passProbability = Math.min(passProbability, 75);
+    }
+
+    if (attempts.length < 2) {
+      passProbability = Math.min(passProbability, 70);
+    }
+
+    passProbability = Math.max(0, Math.min(passProbability, 99));
+
+    return Math.round(passProbability);
+  }
+
+  function getRiskLabel(probability) {
+    if (probability < 50) return { label: "High Risk", color: "text-red-500" };
+    if (probability < 70) return { label: "Borderline", color: "text-amber-500" };
+    if (probability < 85) return { label: "Test-Ready", color: "text-blue-500" };
+    if (probability < 95) return { label: "Strong", color: "text-green-500" };
+    return { label: "Mastery", color: "text-emerald-600" };
+  }
+
+  function renderPassProbability() {
+    const state = loadState(); // uses localStorage loader
+
+    const probability = calculatePassProbability(state);
+    const risk = getRiskLabel(probability);
+
+    const valueEl = document.getElementById("passProbabilityValue");
+    const labelEl = document.getElementById("passProbabilityLabel");
+
+    if (!valueEl || !labelEl) return;
+
+    valueEl.textContent = probability + "%";
+    valueEl.className = "text-4xl font-bold " + risk.color;
+
+    labelEl.textContent = risk.label;
+  }
+
   // ---------- Data sources derived from course facts ----------
   const modules = [
     { id: 'm1', title: 'Fiber Optics Fundamentals & Safety', tags: ['fundamentals','safety'] },
@@ -1729,6 +1822,7 @@
     s.dueDateISO = due.toISOString();
     s.lastReviewedISO = new Date().toISOString();
     saveState();
+    renderPassProbability();
   }
 
   function countDueCards() {
@@ -1923,6 +2017,7 @@
       bestScorePctSnapshot: Math.max(scorePct, Math.max(0,...state.quizAttempts.examSimulator.map(a=>a.scorePct||0)))
     });
     saveState();
+    renderPassProbability();
     alert(`Exam complete: ${scorePct}% in ${durationSec}s`);
   }
 
@@ -2080,6 +2175,7 @@
     qs('#print-toggle')?.addEventListener('click', togglePrintMode);
     // Restore print toggle state
     document.body.classList.toggle('print-mode', state.settings.printMode);
+    renderPassProbability();
   }
 
   document.addEventListener('DOMContentLoaded', init);
